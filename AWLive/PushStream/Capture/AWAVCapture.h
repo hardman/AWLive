@@ -1,0 +1,74 @@
+/*
+ copyright 2016 wanghongyu.
+ The project page：https://github.com/hardman/AWLive
+ My blog page: http://blog.csdn.net/hard_man/
+ */
+
+/*
+ 视频捕获基类。将捕获的音/视频数据送入 encodeSampleQueue串行队列进行编码，然后送入sendSampleQueue队列发送至rtmp接口。
+ */
+
+#import <Foundation/Foundation.h>
+#import <UIKit/UIKit.h>
+#include "aw_all.h"
+#import "AWAVConfig.h"
+#import "AWEncoder.h"
+#import "AWEncoderManager.h"
+
+//rtmp状态回调
+extern void aw_rtmp_state_changed_cb_in_oc(aw_rtmp_state old_state, aw_rtmp_state new_state);
+
+@class AWAVCapture;
+@protocol AWAVCaptureDelegate <NSObject>
+-(void) avCapture:(AWAVCapture *)capture stateChangeFrom:(aw_rtmp_state) fromState toState:(aw_rtmp_state) toState;
+@end
+
+@interface AWAVCapture : NSObject
+//编码器类型
+@property (nonatomic, unsafe_unretained) AWAudioEncoderType audioEncoderType;
+@property (nonatomic, unsafe_unretained) AWAudioEncoderType videoEncoderType;
+
+//编码数据队列
+@property (nonatomic, readonly, strong) dispatch_queue_t encodeSampleQueue;
+//发送数据队列
+@property (nonatomic, readonly, strong) dispatch_queue_t sendSampleQueue;
+//初始化
+-(void) onInit;
+
+//状态变化回调
+@property (nonatomic, weak) id<AWAVCaptureDelegate> stateDelegate;
+
+//是否将数据发送出去
+@property (nonatomic, unsafe_unretained) BOOL isCapturing;
+
+//预览view
+@property (nonatomic, strong) UIView *preview;
+
+//切换摄像头
+-(void) switchCamera;
+
+//停止capture
+-(void) stopCapture;
+
+//停止
+-(void) onStopCapture;
+
+//用户开始
+-(void) onStartCapture;
+
+//开始capture
+-(BOOL) initCaptureWithRtmpUrl:(NSString *)rtmpUrl
+                andVideoConfig:(AWVideoConfig *) videoConfig
+                andAudioConfig:(AWAudioConfig *) audioConfig;
+
+//向发送数据队列添加数据
+-(void) sendVideoSmapleBuffer:(CMSampleBufferRef) sampleBuffer toEncodeQueue:(dispatch_queue_t) encodeQueue toSendQueue:(dispatch_queue_t) sendQueue;
+-(void) sendAudioSmapleBuffer:(CMSampleBufferRef) sampleBuffer toEncodeQueue:(dispatch_queue_t) encodeQueue toSendQueue:(dispatch_queue_t) sendQueue;
+
+-(void) sendVideoYuvData:(NSData *)videoData toEncodeQueue:(dispatch_queue_t) encodeQueue toSendQueue:(dispatch_queue_t) sendQueue;
+-(void) sendAudioPcmData:(NSData *)videoData toEncodeQueue:(dispatch_queue_t) encodeQueue toSendQueue:(dispatch_queue_t) sendQueue;
+
+-(void) sendFlvVideoTag:(aw_flv_video_tag *)flvVideoTag toSendQueue:(dispatch_queue_t) sendQueue;
+-(void) sendFlvAudioTag:(aw_flv_audio_tag *)flvAudioTag toSendQueue:(dispatch_queue_t) sendQueue;
+
+@end
