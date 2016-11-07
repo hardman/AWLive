@@ -26,7 +26,7 @@ static OSStatus aacEncodeInputDataProc(AudioConverterRef inAudioConverter, UInt3
         ioData->mBuffers[0].mData = (void *)hwAacEncoder.curFramePcmData.bytes;
         ioData->mBuffers[0].mDataByteSize = (uint32_t)hwAacEncoder.curFramePcmData.length;
         ioData->mNumberBuffers = 1;
-        ioData->mBuffers[0].mNumberChannels = 1;
+        ioData->mBuffers[0].mNumberChannels = (uint32_t)hwAacEncoder.audioConfig.channelCount;
         
         return noErr;
     }
