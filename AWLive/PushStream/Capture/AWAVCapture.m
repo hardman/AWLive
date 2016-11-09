@@ -57,11 +57,16 @@ extern void aw_rtmp_state_changed_cb_in_oc(aw_rtmp_state old_state, aw_rtmp_stat
     return _encoderManager;
 }
 
-
 - (instancetype)init
 {
+    @throw [NSException exceptionWithName:@"please call initWithVideoConfig:audioConfig to init" reason:nil userInfo:nil];
+}
+
+-(instancetype) initWithVideoConfig:(AWVideoConfig *)videoConfig audioConfig:(AWAudioConfig *)audioConfig{
     self = [super init];
     if (self) {
+        self.videoConfig = videoConfig;
+        self.audioConfig = audioConfig;
         sAWAVCapture = self;
         [self onInit];
         
@@ -71,6 +76,8 @@ extern void aw_rtmp_state_changed_cb_in_oc(aw_rtmp_state old_state, aw_rtmp_stat
     return self;
 }
 
+-(void) onInit{}
+
 -(void) willEnterForeground{
     self.inBackground = NO;
 }
@@ -79,15 +86,29 @@ extern void aw_rtmp_state_changed_cb_in_oc(aw_rtmp_state old_state, aw_rtmp_stat
     self.inBackground = YES;
 }
 
--(void) onInit{}
+//修改fps
+-(void) updateFps:(NSInteger) fps{
+    NSArray *videoDevices = [AVCaptureDevice devicesWithMediaType:AVMediaTypeVideo];
+    
+    for (AVCaptureDevice *vDevice in videoDevices) {
+        float maxRate = [(AVFrameRateRange *)[vDevice.activeFormat.videoSupportedFrameRateRanges objectAtIndex:0] maxFrameRate];
+        if (maxRate >= fps) {
+            if ([vDevice lockForConfiguration:NULL]) {
+                vDevice.activeVideoMinFrameDuration = CMTimeMake(10, (int)(fps * 10));
+                vDevice.activeVideoMaxFrameDuration = vDevice.activeVideoMinFrameDuration;
+                [vDevice unlockForConfiguration];
+            }
+        }
+    }
+}
 
--(BOOL) initCaptureWithRtmpUrl:(NSString *)rtmpUrl andVideoConfig:(AWVideoConfig *)videoConfig andAudioConfig:(AWAudioConfig *)audioConfig{
+-(BOOL) startCaptureWithRtmpUrl:(NSString *)rtmpUrl{
     if (!rtmpUrl || rtmpUrl.length < 8) {
         NSLog(@"rtmpUrl is nil when start capture");
         return NO;
     }
     
-    if (!videoConfig && !audioConfig) {
+    if (!self.videoConfig && !self.audioConfig) {
         NSLog(@"one of videoConfig and audioConfig must be NON-NULL");
         return NO;
     }
@@ -95,7 +116,7 @@ extern void aw_rtmp_state_changed_cb_in_oc(aw_rtmp_state old_state, aw_rtmp_stat
     __weak typeof(self) weakSelf = self;
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
         //先开启encoder
-        [weakSelf.encoderManager openWithAudioConfig:audioConfig videoConfig:videoConfig];
+        [weakSelf.encoderManager openWithAudioConfig:weakSelf.audioConfig videoConfig:weakSelf.videoConfig];
         //再打开rtmp
         int retcode = aw_streamer_open(rtmpUrl.UTF8String, aw_rtmp_state_changed_cb_in_oc);
         
@@ -114,6 +135,8 @@ extern void aw_rtmp_state_changed_cb_in_oc(aw_rtmp_state old_state, aw_rtmp_stat
     __weak typeof(self) weakSelf = self;
     dispatch_async(self.sendSampleQueue, ^{
         aw_streamer_close();
+    });
+    dispatch_async(self.encodeSampleQueue, ^{
         [weakSelf.encoderManager close];
     });
 }

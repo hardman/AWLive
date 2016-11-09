@@ -29,4 +29,7 @@ typedef enum : NSUInteger {
 @property (nonatomic, unsafe_unretained) AWAudioEncoderType audioEncoderType;
 @property (nonatomic, unsafe_unretained) AWAudioEncoderType videoEncoderType;
 
+//配置
+@property (nonatomic, strong) AWAudioConfig *audioConfig;
+@property (nonatomic, strong) AWVideoConfig *videoConfig;
 @end

@@ -19,14 +19,14 @@
 
 -(AWGPUImageAVCapture *)gpuImageAvCapture{
     if (!_gpuImageAvCapture) {
-        _gpuImageAvCapture = [[AWGPUImageAVCapture alloc] init];
+        _gpuImageAvCapture = [[AWGPUImageAVCapture alloc] initWithVideoConfig:self.videoConfig audioConfig:self.audioConfig];
     }
     return _gpuImageAvCapture;
 }
 
 -(AWSystemAVCapture *)systemAvCapture{
     if (!_systemAvCapture) {
-        _systemAvCapture = [[AWSystemAVCapture alloc] init];
+        _systemAvCapture = [[AWSystemAVCapture alloc] initWithVideoConfig:self.videoConfig audioConfig:self.audioConfig];
     }
     return _systemAvCapture;
 }
@@ -39,6 +39,16 @@
     
     if (!self.videoEncoderType) {
         NSLog(@"[E] AVAVCaptureManager 未设置videoEncoderType");
+        return nil;
+    }
+    
+    if (!self.videoConfig) {
+        NSLog(@"[E] AWAVCaptureManager 未设置videoConfig");
+        return nil;
+    }
+    
+    if (!self.audioConfig) {
+        NSLog(@"[E] AWAVCaptureManager 未设置audioConfig");
         return nil;
     }
     

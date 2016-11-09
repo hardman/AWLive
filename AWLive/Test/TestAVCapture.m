@@ -39,6 +39,8 @@ static NSString *sRtmpUrl = @"rtmp://192.168.31.153/live/test";
         _captureManager.captureType = AWAVCaptureTypeGPUImage;
         _captureManager.audioEncoderType = AWAudioEncoderTypeSWFAAC;
         _captureManager.videoEncoderType = AWVideoEncoderTypeHWH264;
+        _captureManager.audioConfig = [[AWAudioConfig alloc] init];
+        _captureManager.videoConfig = [[AWVideoConfig alloc] init];
     }
     return _captureManager;
 }
@@ -130,7 +132,7 @@ static NSString *sRtmpUrl = @"rtmp://192.168.31.153/live/test";
         [self.startBtn setTitle:@"开始录制！" forState:UIControlStateNormal];
         [self.avCapture stopCapture];
     }else{
-        if ([self.avCapture initCaptureWithRtmpUrl:sRtmpUrl andVideoConfig:[[AWVideoConfig alloc] init] andAudioConfig:[[AWAudioConfig alloc] init]]) {
+        if ([self.avCapture startCaptureWithRtmpUrl:sRtmpUrl]) {
             [self.startBtn setTitle:@"停止录制！" forState:UIControlStateNormal];
         }
     }

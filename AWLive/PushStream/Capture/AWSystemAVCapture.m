@@ -44,6 +44,9 @@
     [self createCaptureDevice];
     [self createCaptureSession];
     [self createPreviewLayer];
+    
+    //更新fps
+    [self updateFps: self.videoConfig.fps];
 }
 
 //初始化视频设备

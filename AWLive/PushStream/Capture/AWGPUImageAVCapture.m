@@ -97,10 +97,12 @@
     _videoCamera.awAudioDelegate = _dataHandler;
     
     [self.videoCamera startCameraCapture];
+    
+    [self updateFps:self.videoConfig.fps];
 }
 
--(BOOL)initCaptureWithRtmpUrl:(NSString *)rtmpUrl andVideoConfig:(AWVideoConfig *)videoConfig andAudioConfig:(AWAudioConfig *)audioConfig{
-    return [super initCaptureWithRtmpUrl:rtmpUrl andVideoConfig:videoConfig andAudioConfig:audioConfig];
+-(BOOL)startCaptureWithRtmpUrl:(NSString *)rtmpUrl{
+    return [super startCaptureWithRtmpUrl:rtmpUrl];
 }
 
 -(void)switchCamera{

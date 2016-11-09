@@ -24,6 +24,10 @@ extern void aw_rtmp_state_changed_cb_in_oc(aw_rtmp_state old_state, aw_rtmp_stat
 @end
 
 @interface AWAVCapture : NSObject
+//配置
+@property (nonatomic, strong) AWAudioConfig *audioConfig;
+@property (nonatomic, strong) AWVideoConfig *videoConfig;
+
 //编码器类型
 @property (nonatomic, unsafe_unretained) AWAudioEncoderType audioEncoderType;
 @property (nonatomic, unsafe_unretained) AWAudioEncoderType videoEncoderType;
@@ -32,8 +36,6 @@ extern void aw_rtmp_state_changed_cb_in_oc(aw_rtmp_state old_state, aw_rtmp_stat
 @property (nonatomic, readonly, strong) dispatch_queue_t encodeSampleQueue;
 //发送数据队列
 @property (nonatomic, readonly, strong) dispatch_queue_t sendSampleQueue;
-//初始化
--(void) onInit;
 
 //状态变化回调
 @property (nonatomic, weak) id<AWAVCaptureDelegate> stateDelegate;
@@ -43,6 +45,15 @@ extern void aw_rtmp_state_changed_cb_in_oc(aw_rtmp_state old_state, aw_rtmp_stat
 
 //预览view
 @property (nonatomic, strong) UIView *preview;
+
+//初始化
+-(instancetype) initWithVideoConfig:(AWVideoConfig *)videoConfig audioConfig:(AWAudioConfig *)audioConfig;
+
+//初始化
+-(void) onInit;
+
+//修改fps
+-(void) updateFps:(NSInteger) fps;
 
 //切换摄像头
 -(void) switchCamera;
@@ -57,9 +68,7 @@ extern void aw_rtmp_state_changed_cb_in_oc(aw_rtmp_state old_state, aw_rtmp_stat
 -(void) onStartCapture;
 
 //开始capture
--(BOOL) initCaptureWithRtmpUrl:(NSString *)rtmpUrl
-                andVideoConfig:(AWVideoConfig *) videoConfig
-                andAudioConfig:(AWAudioConfig *) audioConfig;
+-(BOOL) startCaptureWithRtmpUrl:(NSString *)rtmpUrl;
 
 //向发送数据队列添加数据
 -(void) sendVideoSmapleBuffer:(CMSampleBufferRef) sampleBuffer toEncodeQueue:(dispatch_queue_t) encodeQueue toSendQueue:(dispatch_queue_t) sendQueue;
