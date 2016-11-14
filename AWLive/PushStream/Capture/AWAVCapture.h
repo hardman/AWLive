@@ -46,6 +46,9 @@ extern void aw_rtmp_state_changed_cb_in_oc(aw_rtmp_state old_state, aw_rtmp_stat
 //预览view
 @property (nonatomic, strong) UIView *preview;
 
+//根据videoConfig获取当前CaptureSession preset分辨率
+@property (nonatomic, readonly, copy) NSString *captureSessionPreset;
+
 //初始化
 -(instancetype) initWithVideoConfig:(AWVideoConfig *)videoConfig audioConfig:(AWAudioConfig *)audioConfig;
 

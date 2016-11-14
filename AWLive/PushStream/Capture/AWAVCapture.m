@@ -270,4 +270,16 @@ extern void aw_rtmp_state_changed_cb_in_oc(aw_rtmp_state old_state, aw_rtmp_stat
     });
 }
 
+-(NSString *)captureSessionPreset{
+    NSString *captureSessionPreset = nil;
+    if(self.videoConfig.width == 480 && self.videoConfig.height == 640){
+        captureSessionPreset = AVCaptureSessionPreset640x480;
+    }else if(self.videoConfig.width == 540 && self.videoConfig.height == 960){
+        captureSessionPreset = AVCaptureSessionPresetiFrame960x540;
+    }else if(self.videoConfig.width == 720 && self.videoConfig.height == 1280){
+        captureSessionPreset = AVCaptureSessionPreset1280x720;
+    }
+    return captureSessionPreset;
+}
+
 @end

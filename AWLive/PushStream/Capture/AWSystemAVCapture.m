@@ -38,10 +38,14 @@
     }else{
         self.videoInputDevice = self.frontCamera;
     }
+    
+    //更新fps
+    [self updateFps: self.videoConfig.fps];
 }
 
 -(void)onInit{
     [self createCaptureDevice];
+    [self createOutput];
     [self createCaptureSession];
     [self createPreviewLayer];
     
@@ -61,13 +65,14 @@
     AVCaptureDevice *audioDevice = [AVCaptureDevice defaultDeviceWithMediaType:AVMediaTypeAudio];
     self.audioInputDevice = [AVCaptureDeviceInput deviceInputWithDevice:audioDevice error:nil];
     
-    [self createOutput];
-    
     self.videoInputDevice = self.frontCamera;
 }
 
 //切换摄像头
 -(void)setVideoInputDevice:(AVCaptureDeviceInput *)videoInputDevice{
+    if ([videoInputDevice isEqual:_videoInputDevice]) {
+        return;
+    }
     //modifyinput
     [self.captureSession beginConfiguration];
     if (_videoInputDevice) {
@@ -128,7 +133,7 @@
         [self.captureSession addOutput:self.audioDataOutput];
     }
     
-    self.captureSession.sessionPreset = AVCaptureSessionPreset640x480;
+    self.captureSession.sessionPreset = self.captureSessionPreset;
     
     [self.captureSession commitConfiguration];
     

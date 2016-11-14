@@ -1,10 +1,8 @@
-//
-//  AWAVCaptureManager.h
-//  AWLive
-//
-//  Created by wanghongyu on 6/11/16.
-//
-//
+/*
+ copyright 2016 wanghongyu.
+ The project page：https://github.com/hardman/AWLive
+ My blog page: http://blog.csdn.net/hard_man/
+ */
 
 /*
  用于生成AVCapture，不同的捕获视频的方法

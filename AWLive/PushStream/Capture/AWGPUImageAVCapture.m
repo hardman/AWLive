@@ -71,7 +71,7 @@
 
 -(void)onInit{
     //摄像头
-    _videoCamera = [[AWGPUImageVideoCamera alloc] initWithSessionPreset:AVCaptureSessionPreset640x480 cameraPosition:AVCaptureDevicePositionFront];
+    _videoCamera = [[AWGPUImageVideoCamera alloc] initWithSessionPreset:self.captureSessionPreset cameraPosition:AVCaptureDevicePositionFront];
     //声音
     [_videoCamera addAudioInputsAndOutputs];
     //屏幕方向
@@ -92,7 +92,7 @@
     [_beautifyFilter addTarget:_gpuImageView];
     
     //数据处理
-    _dataHandler = [[AWGPUImageAVCaptureDataHandler alloc] initWithImageSize:CGSizeMake(480, 640) resultsInBGRAFormat:YES capture:self];
+    _dataHandler = [[AWGPUImageAVCaptureDataHandler alloc] initWithImageSize:CGSizeMake(self.videoConfig.width, self.videoConfig.height) resultsInBGRAFormat:YES capture:self];
     [_beautifyFilter addTarget:_dataHandler];
     _videoCamera.awAudioDelegate = _dataHandler;
     
@@ -107,6 +107,7 @@
 
 -(void)switchCamera{
     [self.videoCamera rotateCamera];
+    [self updateFps:self.videoConfig.fps];
 }
 
 -(void)onStartCapture{
