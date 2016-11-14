@@ -133,6 +133,10 @@
         [self.captureSession addOutput:self.audioDataOutput];
     }
     
+    if (![self.captureSession canSetSessionPreset:self.captureSessionPreset]) {
+        @throw [NSException exceptionWithName:@"Not supported captureSessionPreset" reason:[NSString stringWithFormat:@"captureSessionPreset is [%@]", self.captureSessionPreset] userInfo:nil];
+    }
+    
     self.captureSession.sessionPreset = self.captureSessionPreset;
     
     [self.captureSession commitConfiguration];

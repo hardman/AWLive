@@ -21,4 +21,6 @@
 
 @property (nonatomic, weak) id<AWGPUImageVideoCameraDelegate> awAudioDelegate;
 
+-(void)setCaptureSessionPreset:(NSString *)captureSessionPreset;
+
 @end
