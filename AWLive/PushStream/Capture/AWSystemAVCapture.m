@@ -172,9 +172,9 @@
 -(void)captureOutput:(AVCaptureOutput *)captureOutput didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer fromConnection:(AVCaptureConnection *)connection{
     if (self.isCapturing) {
         if ([self.videoDataOutput isEqual:captureOutput]) {
-            [self sendVideoSmapleBuffer:sampleBuffer toEncodeQueue:self.encodeSampleQueue toSendQueue:self.sendSampleQueue];
+            [self sendVideoSampleBuffer:sampleBuffer];
         }else if([self.audioDataOutput isEqual:captureOutput]){
-            [self sendAudioSmapleBuffer:sampleBuffer toEncodeQueue:self.encodeSampleQueue toSendQueue:self.sendSampleQueue];
+            [self sendAudioSampleBuffer:sampleBuffer];
         }
     }
 }

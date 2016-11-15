@@ -73,14 +73,14 @@ extern void aw_rtmp_state_changed_cb_in_oc(aw_rtmp_state old_state, aw_rtmp_stat
 //开始capture
 -(BOOL) startCaptureWithRtmpUrl:(NSString *)rtmpUrl;
 
-//向发送数据队列添加数据
--(void) sendVideoSmapleBuffer:(CMSampleBufferRef) sampleBuffer toEncodeQueue:(dispatch_queue_t) encodeQueue toSendQueue:(dispatch_queue_t) sendQueue;
--(void) sendAudioSmapleBuffer:(CMSampleBufferRef) sampleBuffer toEncodeQueue:(dispatch_queue_t) encodeQueue toSendQueue:(dispatch_queue_t) sendQueue;
+//使用rtmp协议发送数据
+-(void) sendVideoSampleBuffer:(CMSampleBufferRef) sampleBuffer;
+-(void) sendAudioSampleBuffer:(CMSampleBufferRef) sampleBuffer;
 
--(void) sendVideoYuvData:(NSData *)videoData toEncodeQueue:(dispatch_queue_t) encodeQueue toSendQueue:(dispatch_queue_t) sendQueue;
--(void) sendAudioPcmData:(NSData *)videoData toEncodeQueue:(dispatch_queue_t) encodeQueue toSendQueue:(dispatch_queue_t) sendQueue;
+-(void) sendVideoYuvData:(NSData *)videoData;
+-(void) sendAudioPcmData:(NSData *)audioData;
 
--(void) sendFlvVideoTag:(aw_flv_video_tag *)flvVideoTag toSendQueue:(dispatch_queue_t) sendQueue;
--(void) sendFlvAudioTag:(aw_flv_audio_tag *)flvAudioTag toSendQueue:(dispatch_queue_t) sendQueue;
+-(void) sendFlvVideoTag:(aw_flv_video_tag *)flvVideoTag;
+-(void) sendFlvAudioTag:(aw_flv_audio_tag *)flvAudioTag;
 
 @end

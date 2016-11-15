@@ -170,7 +170,7 @@ extern void aw_rtmp_state_changed_cb_in_oc(aw_rtmp_state old_state, aw_rtmp_stat
 }
 
 //发送数据
--(void) sendVideoSmapleBuffer:(CMSampleBufferRef) sampleBuffer toEncodeQueue:(dispatch_queue_t) encodeQueue toSendQueue:(dispatch_queue_t) sendQueue{
+-(void) sendVideoSampleBuffer:(CMSampleBufferRef) sampleBuffer toEncodeQueue:(dispatch_queue_t) encodeQueue toSendQueue:(dispatch_queue_t) sendQueue{
     if (_inBackground) {
         return;
     }
@@ -183,7 +183,7 @@ extern void aw_rtmp_state_changed_cb_in_oc(aw_rtmp_state old_state, aw_rtmp_stat
     });
 }
 
--(void) sendAudioSmapleBuffer:(CMSampleBufferRef) sampleBuffer toEncodeQueue:(dispatch_queue_t) encodeQueue toSendQueue:(dispatch_queue_t) sendQueue{
+-(void) sendAudioSampleBuffer:(CMSampleBufferRef) sampleBuffer toEncodeQueue:(dispatch_queue_t) encodeQueue toSendQueue:(dispatch_queue_t) sendQueue{
     CFRetain(sampleBuffer);
     __weak typeof(self) weakSelf = self;
     dispatch_async(encodeQueue, ^{
@@ -268,6 +268,30 @@ extern void aw_rtmp_state_changed_cb_in_oc(aw_rtmp_state old_state, aw_rtmp_stat
         
         aw_log("[D] is sps pps and audio sepcific config sent=%d", weakSelf.isSpsPpsAndAudioSpecificConfigSent);
     });
+}
+
+//使用rtmp协议发送数据
+-(void) sendVideoSampleBuffer:(CMSampleBufferRef) sampleBuffer{
+    [self sendVideoSampleBuffer:sampleBuffer toEncodeQueue:self.encodeSampleQueue toSendQueue:self.sendSampleQueue];
+}
+
+-(void) sendAudioSampleBuffer:(CMSampleBufferRef) sampleBuffer{
+    [self sendAudioSampleBuffer:sampleBuffer toEncodeQueue:self.encodeSampleQueue toSendQueue:self.sendSampleQueue];
+}
+
+-(void) sendVideoYuvData:(NSData *)videoData{
+    [self sendVideoYuvData:(NSData *)videoData toEncodeQueue:self.encodeSampleQueue toSendQueue:self.sendSampleQueue];
+}
+-(void) sendAudioPcmData:(NSData *)audioData{
+    [self sendAudioPcmData:audioData toEncodeQueue:self.encodeSampleQueue toSendQueue:self.sendSampleQueue];
+}
+
+-(void) sendFlvVideoTag:(aw_flv_video_tag *)flvVideoTag{
+    [self sendFlvVideoTag:flvVideoTag toSendQueue:self.sendSampleQueue];
+}
+
+-(void) sendFlvAudioTag:(aw_flv_audio_tag *)flvAudioTag{
+    [self sendFlvAudioTag:flvAudioTag toSendQueue:self.sendSampleQueue];
 }
 
 -(NSString *)captureSessionPreset{

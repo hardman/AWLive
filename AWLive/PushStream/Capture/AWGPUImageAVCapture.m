@@ -30,7 +30,7 @@
     if(!self.capture || !self.capture.isCapturing){
         return;
     }
-    [self.capture sendAudioSmapleBuffer:sampleBuffer toEncodeQueue:self.capture.encodeSampleQueue toSendQueue:self.capture.sendSampleQueue];
+    [self.capture sendAudioSampleBuffer:sampleBuffer];
 }
 
 -(void)newFrameReadyAtTime:(CMTime)frameTime atIndex:(NSInteger)textureIndex{
@@ -52,7 +52,7 @@
     
     NSData *yuvData = [NSData dataWithBytesNoCopy:yuv_bytes length:yuv_len];
     
-    [self.capture sendVideoYuvData:yuvData toEncodeQueue:self.capture.encodeSampleQueue toSendQueue:self.capture.sendSampleQueue];
+    [self.capture sendVideoYuvData:yuvData];
 }
 
 @end
