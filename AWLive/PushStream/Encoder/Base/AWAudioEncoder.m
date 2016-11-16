@@ -20,13 +20,19 @@
 }
 
 -(NSData *) convertAudioSmapleBufferToPcmData:(CMSampleBufferRef) audioSample{
+    //获取pcm数据大小
     NSInteger audioDataSize = CMSampleBufferGetTotalSampleSize(audioSample);
     
+    //分配空间
     int8_t *audio_data = aw_alloc((int32_t)audioDataSize);
     
+    //获取CMBlockBufferRef
+    //这个结构里面就保存了 PCM数据
     CMBlockBufferRef dataBuffer = CMSampleBufferGetDataBuffer(audioSample);
+    //直接将数据copy至我们自己分配的内存中
     CMBlockBufferCopyDataBytes(dataBuffer, 0, audioDataSize, audio_data);
     
+    //返回数据
     return [NSData dataWithBytesNoCopy:audio_data length:audioDataSize];
 }
 
