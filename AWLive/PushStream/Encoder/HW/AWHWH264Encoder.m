@@ -73,7 +73,6 @@
     if (status == noErr) {
         dispatch_semaphore_wait(self.vSemaphore, DISPATCH_TIME_FOREVER);
         if (_naluData) {
-            CVPixelBufferUnlockBaseAddress(pixelBuf, 0);
             const uint8_t nalu_header[] = {0,0,0,1};
             NSMutableData *mutableData = [NSMutableData dataWithBytes:nalu_header length:4];
             [mutableData appendData:_naluData];
