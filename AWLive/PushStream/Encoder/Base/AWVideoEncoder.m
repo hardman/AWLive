@@ -5,6 +5,7 @@
  */
 
 #import "AWVideoEncoder.h"
+#include "libyuv.h"
 
 @implementation AWVideoEncoder
 
@@ -47,10 +48,11 @@
     uint8_t *u_frame_p = u_frame;
     uint8_t *v_frame_p = v_frame;
     
-    // 注意这里
-    // CVImageBufferRef中存储的uv数据是这样的（一个u接一个v）：
+    // 注意这里：YUV420也分很多储存方式：如NV12，YV12，I420
+    // 它们数据量是相同的，只是字节存储顺序不同。
+    // CVImageBufferRef中存储的uv数据是这样的（NV12格式，一个u接一个v）：
     // u0 v0 u1 v1 u2 v2 ... un vn
-    // 而我们想要的格式是这样的（u和v分开）：
+    // 而我们想要的格式是这样的（I420格式：u和v分开）：
     // u0 u1 u2 ... un v0 v1 v2... vn
     // 所以采用隔位赋值的方法，将uv数据分开
     for (int i = 0; i < uv_size; i++) {
@@ -58,7 +60,7 @@
         *v_frame++ = *uv_frame++;
     }
     
-    //将yuv数据按照 y0 y1 y2...yn u0 u1 u2 ...un v0 v1 v2 ... vn的格式拼起来
+    //将yuv数据按照 y0 y1 y2...yn u0 u1 u2 ...un v0 v1 v2 ... vn的格式（I420）拼起来
     uint8_t *yuv_frame = aw_alloc(uv_size * 2 + y_size);
     memcpy(yuv_frame, y_frame, y_size);
     memcpy(yuv_frame + y_size, u_frame_p, uv_size);
