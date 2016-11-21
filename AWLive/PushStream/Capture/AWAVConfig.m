@@ -42,7 +42,7 @@
         self.height = 640;
         self.bitrate = 1000000;
         self.fps = 20;
-        self.dataFormat = X264_CSP_I420;
+        self.dataFormat = X264_CSP_NV12;
     }
     return self;
 }

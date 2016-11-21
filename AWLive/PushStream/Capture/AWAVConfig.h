@@ -25,7 +25,7 @@
 @property (nonatomic, unsafe_unretained) NSInteger height;//可选，系统支持的分辨率
 @property (nonatomic, unsafe_unretained) NSInteger bitrate;//自由设置
 @property (nonatomic, unsafe_unretained) NSInteger fps;//自由设置
-@property (nonatomic, unsafe_unretained) NSInteger dataFormat;//目前只能是X264_CSP_I420，硬编码无需设置
+@property (nonatomic, unsafe_unretained) NSInteger dataFormat;//目前软编码只能是X264_CSP_NV12，硬编码无需设置
 
 @property (nonatomic, readonly, unsafe_unretained) aw_x264_config x264Config;
 @end

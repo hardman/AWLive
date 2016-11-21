@@ -52,15 +52,8 @@
     uint8_t *y_frame = CVPixelBufferGetBaseAddressOfPlane(pixelBuf, 0);
     memcpy(y_frame, yuv_frame, y_size);
     
-    
     uint8_t *uv_frame = CVPixelBufferGetBaseAddressOfPlane(pixelBuf, 1);
-    uint8_t *u_frame_p = (uint8_t *)yuvData.bytes + y_size;
-    uint8_t *v_frame_p = (uint8_t *)yuvData.bytes + y_size + uv_size;
-    
-    for (int i = 0; i < uv_size; i++) {
-        *uv_frame++ = *u_frame_p++;
-        *uv_frame++ = *v_frame_p++;
-    }
+    memcpy(uv_frame, yuv_frame + y_size, uv_size * 2);
     
     //硬编码 CmSampleBufRef
     
