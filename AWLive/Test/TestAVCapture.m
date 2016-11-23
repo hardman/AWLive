@@ -37,7 +37,7 @@ static NSString *sRtmpUrl = @"rtmp://192.168.31.153/live/test";
         
         //下面的3个类型必须设置，否则获取不到AVCapture
         _captureManager.captureType = AWAVCaptureTypeGPUImage;
-        _captureManager.audioEncoderType = AWAudioEncoderTypeSWFAAC;
+        _captureManager.audioEncoderType = AWAudioEncoderTypeHWAACLC;
         _captureManager.videoEncoderType = AWVideoEncoderTypeHWH264;
         _captureManager.audioConfig = [[AWAudioConfig alloc] init];
         _captureManager.videoConfig = [[AWVideoConfig alloc] init];

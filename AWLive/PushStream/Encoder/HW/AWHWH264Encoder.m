@@ -11,8 +11,8 @@
 @interface AWHWH264Encoder()
 @property (nonatomic, unsafe_unretained) VTCompressionSessionRef vEnSession;
 @property (nonatomic, strong) dispatch_semaphore_t vSemaphore;
-@property (nonatomic, strong) NSData *spsPpsData;
-@property (nonatomic, strong) NSData *naluData;
+@property (nonatomic, copy) NSData *spsPpsData;
+@property (nonatomic, copy) NSData *naluData;
 @property (nonatomic, unsafe_unretained) BOOL isKeyFrame;
 
 @end
@@ -36,7 +36,7 @@
     size_t pixelWidth = self.videoConfig.width;
     size_t pixelHeight = self.videoConfig.height;
     CVPixelBufferRef pixelBuf = NULL;
-    CVPixelBufferCreate(NULL, pixelWidth, pixelHeight, kCVPixelFormatType_420YpCbCr8BiPlanarFullRange, NULL, &pixelBuf);
+    CVPixelBufferCreate(NULL, pixelWidth, pixelHeight, kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange, NULL, &pixelBuf);
     
     if(CVPixelBufferLockBaseAddress(pixelBuf, 0) != kCVReturnSuccess){
         [self onErrorWithCode:AWEncoderErrorCodeLockSampleBaseAddressFailed des:@"encode video lock base address failed"];
@@ -66,8 +66,9 @@
     if (status == noErr) {
         dispatch_semaphore_wait(self.vSemaphore, DISPATCH_TIME_FOREVER);
         if (_naluData) {
-            const uint8_t nalu_header[] = {0,0,0,1};
-            NSMutableData *mutableData = [NSMutableData dataWithBytes:nalu_header length:4];
+            uint32_t naluLen = (uint32_t)_naluData.length;
+            uint8_t naluLenArr[4] = {naluLen >> 24 & 0xff, naluLen >> 16 & 0xff, naluLen >> 8 & 0xff, naluLen & 0xff};
+            NSMutableData *mutableData = [NSMutableData dataWithBytes:naluLenArr length:4];
             [mutableData appendData:_naluData];
             aw_flv_video_tag *video_tag = aw_encoder_create_video_tag((int8_t *)mutableData.bytes, mutableData.length, ptsMs, 0, self.isKeyFrame);
             
@@ -127,23 +128,8 @@ static void vtCompressionSessionCallback (void * CM_NULLABLE outputCallbackRefCo
     if (!encoder.spsPpsData) {
         if (isKeyFrame) {
             CMFormatDescriptionRef sampleBufFormat = CMSampleBufferGetFormatDescription(sampleBuffer);
-            size_t spsLen, spsCount;
-            const uint8_t *sps;
-            status = CMVideoFormatDescriptionGetH264ParameterSetAtIndex(sampleBufFormat, 0, &sps, &spsLen, &spsCount, 0 );
-            if (status == noErr) {
-                size_t ppsLen, ppsCount;
-                const uint8_t *pps;
-                OSStatus statusCode = CMVideoFormatDescriptionGetH264ParameterSetAtIndex(sampleBufFormat, 1, &pps, &ppsLen, &ppsCount, 0 );
-                if (statusCode == noErr) {
-                    aw_data *sps_pps_data = aw_create_sps_pps_data((uint8_t *)sps, (uint32_t)spsLen, (uint8_t *)pps, (uint32_t)ppsLen);
-                    encoder.spsPpsData = [NSData dataWithBytes:sps_pps_data->data length:sps_pps_data->size];
-                    free_aw_data(&sps_pps_data);
-                }else{
-                    [encoder onErrorWithCode:AWEncoderErrorCodeEncodeGetSpsPpsFailed des:@"got pps failed"];
-                }
-            }else{
-                [encoder onErrorWithCode:AWEncoderErrorCodeEncodeGetSpsPpsFailed des:@"got sps failed"];
-            }
+            NSDictionary *dict = (__bridge NSDictionary *)CMFormatDescriptionGetExtensions(sampleBufFormat);
+            encoder.spsPpsData = dict[@"SampleDescriptionExtensionAtoms"][@"avcC"];
         }
         needSpsPps = YES;
     }
