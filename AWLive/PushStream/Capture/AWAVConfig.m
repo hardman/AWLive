@@ -57,7 +57,6 @@
         self.bitrate = 1000000;
         self.fps = 20;
         self.dataFormat = X264_CSP_NV12;
-        self.orientation = UIInterfaceOrientationLandscapeRight;
     }
     return self;
 }
