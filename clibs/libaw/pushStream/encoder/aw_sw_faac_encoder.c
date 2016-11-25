@@ -80,11 +80,15 @@ extern aw_flv_audio_tag *aw_sw_encoder_encode_faac_data(int8_t *pcm_data, long l
     
     aw_encode_pcm_frame_2_aac(s_faac_ctx, pcm_data, len);
     
-    if (s_faac_ctx->encoded_aac_data->size <= 0) {
+    int adts_header_size = 7;
+    
+    //除去ADTS头的7字节
+    if (s_faac_ctx->encoded_aac_data->size <= adts_header_size) {
         return NULL;
     }
     
-    aw_flv_audio_tag *audio_tag = aw_encoder_create_audio_tag((int8_t *)s_faac_ctx->encoded_aac_data->data, s_faac_ctx->encoded_aac_data->size, timestamp, &s_faac_ctx->config);
+    //除去ADTS头的7字节
+    aw_flv_audio_tag *audio_tag = aw_encoder_create_audio_tag((int8_t *)s_faac_ctx->encoded_aac_data->data + adts_header_size, s_faac_ctx->encoded_aac_data->size - adts_header_size, timestamp, &s_faac_ctx->config);
     
     audio_count++;
     
