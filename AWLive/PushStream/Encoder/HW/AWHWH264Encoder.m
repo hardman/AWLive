@@ -33,8 +33,8 @@
     //yuv 变成 转CVPixelBufferRef
     OSStatus status = noErr;
     
-    size_t pixelWidth = self.videoConfig.width;
-    size_t pixelHeight = self.videoConfig.height;
+    size_t pixelWidth = self.videoConfig.pushStreamWidth;
+    size_t pixelHeight = self.videoConfig.pushStreamHeight;
     CVPixelBufferRef pixelBuf = NULL;
     CVPixelBufferCreate(NULL, pixelWidth, pixelHeight, kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange, NULL, &pixelBuf);
     
@@ -165,7 +165,7 @@ static void vtCompressionSessionCallback (void * CM_NULLABLE outputCallbackRefCo
 
 -(void)open{
     //创建 video encode session
-    OSStatus status = VTCompressionSessionCreate(NULL, (int32_t)(self.videoConfig.width), (int32_t)self.videoConfig.height, kCMVideoCodecType_H264, NULL, NULL, NULL, vtCompressionSessionCallback, (__bridge void * _Nullable)(self), &_vEnSession);
+    OSStatus status = VTCompressionSessionCreate(NULL, (int32_t)(self.videoConfig.pushStreamWidth), (int32_t)self.videoConfig.pushStreamHeight, kCMVideoCodecType_H264, NULL, NULL, NULL, vtCompressionSessionCallback, (__bridge void * _Nullable)(self), &_vEnSession);
     if (status == noErr) {
         VTSessionSetProperty(_vEnSession, kVTCompressionPropertyKey_ProfileLevel, kVTProfileLevel_H264_Main_AutoLevel);
         VTSessionSetProperty(_vEnSession, kVTCompressionPropertyKey_AverageBitRate, (__bridge CFTypeRef)@(self.videoConfig.bitrate));

@@ -23,6 +23,10 @@
     self.testVideoCapture = [[TestVideoCapture alloc] initWithViewController:self];
 }
 
+-(void)viewWillLayoutSubviews{
+    [super viewWillLayoutSubviews];
+    [self.testVideoCapture onLayout];
+}
 
 - (void)didReceiveMemoryWarning {
     [super didReceiveMemoryWarning];

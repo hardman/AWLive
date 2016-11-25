@@ -12,7 +12,10 @@
 
 @interface AWVideoEncoder : AWEncoder
 
-@property (nonatomic, strong) AWVideoConfig *videoConfig;
+@property (nonatomic, copy) AWVideoConfig *videoConfig;
+
+//旋转
+-(NSData *)rotateNV12Data:(NSData *)nv12Data;
 
 //编码
 -(aw_flv_video_tag *) encodeYUVDataToFlvTag:(NSData *)yuvData;

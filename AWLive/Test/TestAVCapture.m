@@ -13,13 +13,18 @@
  */
 
 //请修改此地址
-static NSString *sRtmpUrl = @"rtmp://192.168.31.153/live/test";
+static NSString *sRtmpUrl = @"rtmp://192.168.1.61/live/test";
 
 @interface TestVideoCapture ()<AWAVCaptureDelegate>
+
 //按钮
 @property (nonatomic, strong) UIButton *startBtn;
 @property (nonatomic, strong) UIButton *switchBtn;
 
+//状态
+@property (nonatomic, strong) UILabel *stateLabel;
+
+//预览
 @property (nonatomic, strong) UIView *preview;
 
 @property (nonatomic, weak) ViewController *viewController;
@@ -73,15 +78,50 @@ static NSString *sRtmpUrl = @"rtmp://192.168.31.153/live/test";
 -(void) createUI{
     [self.preview addSubview: self.avCapture.preview];
     self.avCapture.preview.center = self.preview.center;
-    self.startBtn = [[UIButton alloc] initWithFrame:CGRectMake(100, 100, 100, 30)];
-    [self.startBtn setTitle:@"开始录制！" forState:UIControlStateNormal];
+    
+    self.stateLabel = [[UILabel alloc] init];
+    self.stateText = @"未连接";
+    [self.viewController.view addSubview:self.stateLabel];
+    
+    self.startBtn = [[UIButton alloc] init];
+    [self.startBtn setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
+    self.startBtn.backgroundColor = [UIColor blackColor];
+    [self.startBtn setTitle:@"开始直播" forState:UIControlStateNormal];
     [self.startBtn addTarget:self action:@selector(onStartClick) forControlEvents:UIControlEventTouchUpInside];
     [self.viewController.view addSubview:self.startBtn];
     
-    self.switchBtn = [[UIButton alloc] initWithFrame:CGRectMake(230, 100, 100, 30)];
-    [self.switchBtn setTitle:@"换摄像头！" forState:UIControlStateNormal];
+    self.switchBtn = [[UIButton alloc] init];
+    UIImage *switchImage = [self imageWithPath:@"camera_switch.png" scale:2];
+    [self.switchBtn setImage:switchImage forState:UIControlStateNormal];
     [self.switchBtn addTarget:self action:@selector(onSwitchClick) forControlEvents:UIControlEventTouchUpInside];
     [self.viewController.view addSubview:self.switchBtn];
+}
+
+-(UIImage *)imageWithPath:(NSString *)path scale:(CGFloat)scale{
+    NSString *imagePath = [[NSBundle mainBundle] pathForResource:path ofType:nil];
+    if (imagePath) {
+        NSData *imgData = [NSData dataWithContentsOfFile:imagePath];
+        if (imgData) {
+            UIImage *image = [UIImage imageWithData:imgData scale:scale];
+            return image;
+        }
+    }
+    
+    return nil;
+}
+
+-(void) onLayout{
+    CGSize screenSize = [UIScreen mainScreen].bounds.size;
+    self.stateLabel.frame = CGRectMake(30, 30, 100, 30);
+    self.startBtn.frame = CGRectMake(40, screenSize.height - 50 - 40, screenSize.width - 80, 40);
+    self.switchBtn.frame = CGRectMake(screenSize.width - 30 - self.switchBtn.currentImage.size.width, 30, self.switchBtn.currentImage.size.width, self.switchBtn.currentImage.size.height);
+    
+    self.preview.frame = self.viewController.view.bounds;
+    self.avCapture.preview.frame = self.preview.bounds;
+}
+
+-(void) setStateText:(NSString *)stateText{
+    self.stateLabel.text = stateText;
 }
 
 #pragma mark 事件
@@ -89,39 +129,41 @@ static NSString *sRtmpUrl = @"rtmp://192.168.31.153/live/test";
     switch (toState) {
         case aw_rtmp_state_idle: {
             self.startBtn.enabled = YES;
-            [self.startBtn setTitle:@"开始录制" forState:UIControlStateNormal];
+            [self.startBtn setTitle:@"开始直播" forState:UIControlStateNormal];
+            self.stateText = @"未连接";
             break;
         }
         case aw_rtmp_state_connecting: {
             self.startBtn.enabled = NO;
-            [self.startBtn setTitle:@"连接中" forState:UIControlStateNormal];
+            self.stateText = @"连接中";
             break;
         }
         case aw_rtmp_state_opened: {
             self.startBtn.enabled = YES;
-            [self.startBtn setTitle:@"运行中" forState:UIControlStateNormal];
+            self.stateText = @"正在直播";
             break;
         }
-        case aw_rtmp_state_connected:
-        {
-            [self.startBtn setTitle:@"已连接" forState:UIControlStateNormal];
+        case aw_rtmp_state_connected: {
+            self.stateText = @"连接成功";
             break;
         }
         case aw_rtmp_state_closed: {
             self.startBtn.enabled = YES;
-            [self.startBtn setTitle:@"已关闭" forState:UIControlStateNormal];
+            self.stateText = @"已关闭";
             break;
         }
         case aw_rtmp_state_error_write: {
-            [self.startBtn setTitle:@"写入错误" forState:UIControlStateNormal];
+            self.stateText = @"写入错误";
             break;
         }
         case aw_rtmp_state_error_open: {
-            [self.startBtn setTitle:@"连接错误" forState:UIControlStateNormal];
+            self.stateText = @"连接错误";
+            self.startBtn.enabled = YES;
             break;
         }
         case aw_rtmp_state_error_net: {
-            [self.startBtn setTitle:@"网络不给力" forState:UIControlStateNormal];
+            self.stateText = @"网络不给力";
+            self.startBtn.enabled = YES;
             break;
         }
     }
@@ -129,11 +171,11 @@ static NSString *sRtmpUrl = @"rtmp://192.168.31.153/live/test";
 
 -(void) onStartClick{
     if (self.avCapture.isCapturing) {
-        [self.startBtn setTitle:@"开始录制！" forState:UIControlStateNormal];
+        [self.startBtn setTitle:@"开始直播" forState:UIControlStateNormal];
         [self.avCapture stopCapture];
     }else{
         if ([self.avCapture startCaptureWithRtmpUrl:sRtmpUrl]) {
-            [self.startBtn setTitle:@"停止录制！" forState:UIControlStateNormal];
+            [self.startBtn setTitle:@"停止直播" forState:UIControlStateNormal];
         }
     }
 }

@@ -201,18 +201,18 @@ extern void aw_streamer_close(){
         return;
     }
     
+    //关闭rtmp
+    aw_streamer_close_rtmp_context();
+    
+    //释放 s_rtmp_ctx;
+    free_aw_rtmp_context(&s_rtmp_ctx);
+    
     s_state_changed_cb = NULL;
     
     if (s_rtmp_url) {
         aw_free(s_rtmp_url);
         s_rtmp_url = NULL;
     }
-    
-    //关闭rtmp
-    aw_streamer_close_rtmp_context();
-    
-    //释放 s_rtmp_ctx;
-    free_aw_rtmp_context(&s_rtmp_ctx);
     
     //释放outbuf
     aw_streamer_release_out_buf();

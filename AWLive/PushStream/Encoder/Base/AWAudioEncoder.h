@@ -12,7 +12,7 @@
 
 @interface AWAudioEncoder : AWEncoder
 
-@property (nonatomic, strong) AWAudioConfig *audioConfig;
+@property (nonatomic, copy) AWAudioConfig *audioConfig;
 //编码
 -(aw_flv_audio_tag *) encodePCMDataToFlvTag:(NSData *)pcmData;
 

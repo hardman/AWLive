@@ -47,6 +47,7 @@
 		A4269F861DCE2A8E0010A4EB /* aw_streamer.c in Sources */ = {isa = PBXBuildFile; fileRef = A4269DF51DCE2A8C0010A4EB /* aw_streamer.c */; };
 		A426A0591DCE2D400010A4EB /* GPUImage.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = A426A0541DCE2B750010A4EB /* GPUImage.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		A426A0621DCF71660010A4EB /* AWAVCaptureManager.m in Sources */ = {isa = PBXBuildFile; fileRef = A426A0611DCF71660010A4EB /* AWAVCaptureManager.m */; };
+		A461BE391DE826D500F18219 /* camera_switch.png in Resources */ = {isa = PBXBuildFile; fileRef = A461BE381DE826D500F18219 /* camera_switch.png */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -191,6 +192,7 @@
 		A426A04B1DCE2B740010A4EB /* GPUImage.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = GPUImage.xcodeproj; path = GPUImage/GPUImage.xcodeproj; sourceTree = "<group>"; };
 		A426A0601DCF71660010A4EB /* AWAVCaptureManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AWAVCaptureManager.h; sourceTree = "<group>"; };
 		A426A0611DCF71660010A4EB /* AWAVCaptureManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AWAVCaptureManager.m; sourceTree = "<group>"; };
+		A461BE381DE826D500F18219 /* camera_switch.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = camera_switch.png; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -229,6 +231,7 @@
 		A4269D591DCE2A1B0010A4EB /* AWLive */ = {
 			isa = PBXGroup;
 			children = (
+				A461BE371DE826BE00F18219 /* Resources */,
 				A4269D711DCE2A390010A4EB /* PushStream */,
 				A4269D941DCE2A390010A4EB /* Test */,
 				A4269D5D1DCE2A1B0010A4EB /* AppDelegate.h */,
@@ -582,6 +585,14 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
+		A461BE371DE826BE00F18219 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				A461BE381DE826D500F18219 /* camera_switch.png */,
+			);
+			name = Resources;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -614,6 +625,7 @@
 				TargetAttributes = {
 					A4269D561DCE2A1B0010A4EB = {
 						CreatedOnToolsVersion = 8.1;
+						DevelopmentTeam = U7W6229UCJ;
 						ProvisioningStyle = Automatic;
 					};
 				};
@@ -665,6 +677,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				A4269D6A1DCE2A1B0010A4EB /* LaunchScreen.storyboard in Resources */,
+				A461BE391DE826D500F18219 /* camera_switch.png in Resources */,
 				A4269D671DCE2A1B0010A4EB /* Assets.xcassets in Resources */,
 				A4269D651DCE2A1B0010A4EB /* Main.storyboard in Resources */,
 			);
@@ -836,7 +849,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = U7W6229UCJ;
 				ENABLE_BITCODE = NO;
 				HEADER_SEARCH_PATHS = "$(PROJECT_DIR)/clibs/3th-party/libyuv/include";
 				INFOPLIST_FILE = AWLive/Info.plist;
@@ -858,7 +871,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = U7W6229UCJ;
 				ENABLE_BITCODE = NO;
 				HEADER_SEARCH_PATHS = "$(PROJECT_DIR)/clibs/3th-party/libyuv/include";
 				INFOPLIST_FILE = AWLive/Info.plist;

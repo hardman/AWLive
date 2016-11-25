@@ -17,7 +17,6 @@
         self.channelCount = 1;
         self.sampleSize = 16;
         self.sampleRate = 44100;
-        
     }
     return self;
 }
@@ -31,6 +30,21 @@
     return faac_config;
 }
 
+-(id)copyWithZone:(NSZone *)zone{
+    AWAudioConfig *audioConfig = [[AWAudioConfig alloc] init];
+    audioConfig.bitrate = self.bitrate;
+    audioConfig.channelCount = self.channelCount;
+    audioConfig.sampleRate = self.sampleRate;
+    audioConfig.sampleSize = self.sampleSize;
+    return audioConfig;
+}
+
+@end
+
+@interface AWVideoConfig()
+//推流宽高
+@property (nonatomic, unsafe_unretained) NSInteger pushStreamWidth;
+@property (nonatomic, unsafe_unretained) NSInteger pushStreamHeight;
 @end
 
 @implementation AWVideoConfig
@@ -43,18 +57,42 @@
         self.bitrate = 1000000;
         self.fps = 20;
         self.dataFormat = X264_CSP_NV12;
+        self.orientation = UIInterfaceOrientationLandscapeRight;
     }
     return self;
 }
 
+-(NSInteger)pushStreamWidth{
+    if (UIInterfaceOrientationIsLandscape(self.orientation)) {
+        return self.height;
+    }
+    return self.width;
+}
+
+-(NSInteger)pushStreamHeight{
+    if (UIInterfaceOrientationIsLandscape(self.orientation)) {
+        return self.width;
+    }
+    return self.height;
+}
+
 -(aw_x264_config) x264Config{
     aw_x264_config x264_config;
-    x264_config.width = (int32_t)self.width;
-    x264_config.height = (int32_t)self.height;
+    x264_config.width = (int32_t)self.pushStreamWidth;
+    x264_config.height = (int32_t)self.pushStreamHeight;
     x264_config.bitrate = (int32_t)self.bitrate;
     x264_config.fps = (int32_t)self.fps;
     x264_config.input_data_format = (int32_t)self.dataFormat;
     return x264_config;
+}
+
+-(id)copyWithZone:(NSZone *)zone{
+    AWVideoConfig *videoConfig = [[AWVideoConfig alloc] init];
+    videoConfig.bitrate = self.bitrate;
+    videoConfig.fps = self.fps;
+    videoConfig.dataFormat = self.dataFormat;
+    videoConfig.orientation = self.orientation;
+    return videoConfig;
 }
 
 @end

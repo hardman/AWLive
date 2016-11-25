@@ -124,6 +124,7 @@ extern void aw_rtmp_state_changed_cb_in_oc(aw_rtmp_state old_state, aw_rtmp_stat
             weakSelf.isCapturing = YES;
         }else{
             NSLog(@"startCapture rtmpOpen error!!! retcode=%d", retcode);
+            [weakSelf stopCapture];
         }
     });
     return YES;
@@ -133,10 +134,10 @@ extern void aw_rtmp_state_changed_cb_in_oc(aw_rtmp_state old_state, aw_rtmp_stat
     self.isCapturing = NO;
     self.isSpsPpsAndAudioSpecificConfigSent = NO;
     __weak typeof(self) weakSelf = self;
-    dispatch_async(self.sendSampleQueue, ^{
+    dispatch_sync(self.sendSampleQueue, ^{
         aw_streamer_close();
     });
-    dispatch_async(self.encodeSampleQueue, ^{
+    dispatch_sync(self.encodeSampleQueue, ^{
         [weakSelf.encoderManager close];
     });
 }
@@ -177,8 +178,10 @@ extern void aw_rtmp_state_changed_cb_in_oc(aw_rtmp_state old_state, aw_rtmp_stat
     CFRetain(sampleBuffer);
     __weak typeof(self) weakSelf = self;
     dispatch_async(encodeQueue, ^{
-        aw_flv_video_tag *video_tag = [weakSelf.encoderManager.videoEncoder encodeVideoSampleBufToFlvTag:sampleBuffer];
-        [weakSelf sendFlvVideoTag:video_tag toSendQueue:sendQueue];
+        if (weakSelf.isCapturing) {
+            aw_flv_video_tag *video_tag = [weakSelf.encoderManager.videoEncoder encodeVideoSampleBufToFlvTag:sampleBuffer];
+            [weakSelf sendFlvVideoTag:video_tag toSendQueue:sendQueue];
+        }
         CFRelease(sampleBuffer);
     });
 }
@@ -187,8 +190,10 @@ extern void aw_rtmp_state_changed_cb_in_oc(aw_rtmp_state old_state, aw_rtmp_stat
     CFRetain(sampleBuffer);
     __weak typeof(self) weakSelf = self;
     dispatch_async(encodeQueue, ^{
-        aw_flv_audio_tag *audio_tag = [weakSelf.encoderManager.audioEncoder encodeAudioSampleBufToFlvTag:sampleBuffer];
-        [weakSelf sendFlvAudioTag:audio_tag toSendQueue:sendQueue];
+        if (weakSelf.isCapturing) {
+            aw_flv_audio_tag *audio_tag = [weakSelf.encoderManager.audioEncoder encodeAudioSampleBufToFlvTag:sampleBuffer];
+            [weakSelf sendFlvAudioTag:audio_tag toSendQueue:sendQueue];
+        }
         CFRelease(sampleBuffer);
     });
 }
@@ -199,16 +204,21 @@ extern void aw_rtmp_state_changed_cb_in_oc(aw_rtmp_state old_state, aw_rtmp_stat
     }
     __weak typeof(self) weakSelf = self;
     dispatch_async(encodeQueue, ^{
-        aw_flv_video_tag *video_tag = [weakSelf.encoderManager.videoEncoder encodeYUVDataToFlvTag:yuvData];
-        [weakSelf sendFlvVideoTag:video_tag toSendQueue:sendQueue];
+        if (weakSelf.isCapturing) {
+            NSData *rotatedData = [weakSelf.encoderManager.videoEncoder rotateNV12Data:yuvData];
+            aw_flv_video_tag *video_tag = [weakSelf.encoderManager.videoEncoder encodeYUVDataToFlvTag:rotatedData];
+            [weakSelf sendFlvVideoTag:video_tag toSendQueue:sendQueue];
+        }
     });
 }
 
 -(void) sendAudioPcmData:(NSData *)pcmData toEncodeQueue:(dispatch_queue_t) encodeQueue toSendQueue:(dispatch_queue_t) sendQueue{
     __weak typeof(self) weakSelf = self;
     dispatch_async(encodeQueue, ^{
-        aw_flv_audio_tag *audio_tag = [weakSelf.encoderManager.audioEncoder encodePCMDataToFlvTag:pcmData];
-        [weakSelf sendFlvAudioTag:audio_tag toSendQueue:sendQueue];
+        if (weakSelf.isCapturing) {
+            aw_flv_audio_tag *audio_tag = [weakSelf.encoderManager.audioEncoder encodePCMDataToFlvTag:pcmData];
+            [weakSelf sendFlvAudioTag:audio_tag toSendQueue:sendQueue];
+        }
     });
 }
 
@@ -219,10 +229,10 @@ extern void aw_rtmp_state_changed_cb_in_oc(aw_rtmp_state old_state, aw_rtmp_stat
     __weak typeof(self) weakSelf = self;
     if (video_tag) {
         dispatch_async(sendQueue, ^{
-            if (!weakSelf.isSpsPpsAndAudioSpecificConfigSent) {
-                [weakSelf sendSpsPpsAndAudioSpecificConfigTagToSendQueue:sendQueue];
-            }else{
-                if(weakSelf.isCapturing){
+            if(weakSelf.isCapturing){
+                if (!weakSelf.isSpsPpsAndAudioSpecificConfigSent) {
+                    [weakSelf sendSpsPpsAndAudioSpecificConfigTagToSendQueue:sendQueue];
+                }else{
                     aw_streamer_send_video_data(video_tag);
                 }
             }
@@ -234,10 +244,10 @@ extern void aw_rtmp_state_changed_cb_in_oc(aw_rtmp_state old_state, aw_rtmp_stat
     __weak typeof(self) weakSelf = self;
     if(audio_tag){
         dispatch_async(sendQueue, ^{
-            if (!weakSelf.isSpsPpsAndAudioSpecificConfigSent) {
-                [weakSelf sendSpsPpsAndAudioSpecificConfigTagToSendQueue:sendQueue];
-            }else{
-                if(weakSelf.isCapturing){
+            if(weakSelf.isCapturing){
+                if (!weakSelf.isSpsPpsAndAudioSpecificConfigSent) {
+                    [weakSelf sendSpsPpsAndAudioSpecificConfigTagToSendQueue:sendQueue];
+                }else{
                     aw_streamer_send_audio_data(audio_tag);
                 }
             }
@@ -251,7 +261,7 @@ extern void aw_rtmp_state_changed_cb_in_oc(aw_rtmp_state old_state, aw_rtmp_stat
     }
     __weak typeof(self) weakSelf = self;
     dispatch_async(sendQueue, ^{
-        if (weakSelf.isSpsPpsAndAudioSpecificConfigSent) {
+        if (!weakSelf.isCapturing || weakSelf.isSpsPpsAndAudioSpecificConfigSent) {
             return;
         }
         //video sps pps tag

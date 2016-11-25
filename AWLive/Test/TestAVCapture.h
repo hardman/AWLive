@@ -11,4 +11,5 @@
 
 -(instancetype) initWithViewController:(ViewController *)viewCtl;
 
+-(void) onLayout;
 @end

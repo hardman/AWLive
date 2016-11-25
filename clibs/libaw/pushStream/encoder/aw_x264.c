@@ -211,11 +211,6 @@ extern aw_x264_context *alloc_aw_x264_context(aw_x264_config config){
 extern void free_aw_x264_context(aw_x264_context **ctx_p){
     aw_x264_context *ctx = *ctx_p;
     if (ctx) {
-        //关闭handler
-        if (ctx->x264_handler) {
-            x264_encoder_close(ctx->x264_handler);
-            ctx->x264_handler = NULL;
-        }
         //释放pic_in
         if (ctx->pic_in) {
             x264_picture_clean(ctx->pic_in);
@@ -233,6 +228,12 @@ extern void free_aw_x264_context(aw_x264_context **ctx_p){
         
         if (ctx->sps_pps_data) {
             free_aw_data(&ctx->sps_pps_data);
+        }
+        
+        //关闭handler
+        if (ctx->x264_handler) {
+            x264_encoder_close(ctx->x264_handler);
+            ctx->x264_handler = NULL;
         }
         
         aw_free(ctx);
