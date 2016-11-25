@@ -23,6 +23,7 @@ blog：http://blog.csdn.net/hard_man
 - 视频捕获：系统方法捕获，GPUImage捕获，CMSampleRef解析
 - 美颜滤镜：GPUImage，
 - 视频变换：libyuv
+- 横屏直播
 - 软编码：faac，x264
 - 硬编码：VideoToolbox(aac/h264)
 - libaw：C语言函数库
