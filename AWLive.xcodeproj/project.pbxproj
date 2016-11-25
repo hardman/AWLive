@@ -625,7 +625,6 @@
 				TargetAttributes = {
 					A4269D561DCE2A1B0010A4EB = {
 						CreatedOnToolsVersion = 8.1;
-						DevelopmentTeam = U7W6229UCJ;
 						ProvisioningStyle = Automatic;
 					};
 				};
@@ -849,7 +848,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				DEVELOPMENT_TEAM = U7W6229UCJ;
+				DEVELOPMENT_TEAM = "";
 				ENABLE_BITCODE = NO;
 				HEADER_SEARCH_PATHS = "$(PROJECT_DIR)/clibs/3th-party/libyuv/include";
 				INFOPLIST_FILE = AWLive/Info.plist;
@@ -864,6 +863,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.AWLive;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Debug;
 		};
@@ -871,7 +871,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				DEVELOPMENT_TEAM = U7W6229UCJ;
+				DEVELOPMENT_TEAM = "";
 				ENABLE_BITCODE = NO;
 				HEADER_SEARCH_PATHS = "$(PROJECT_DIR)/clibs/3th-party/libyuv/include";
 				INFOPLIST_FILE = AWLive/Info.plist;
@@ -886,6 +886,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.AWLive;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Release;
 		};

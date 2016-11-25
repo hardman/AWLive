@@ -46,6 +46,9 @@ static NSString *sRtmpUrl = @"rtmp://192.168.1.61/live/test";
         _captureManager.videoEncoderType = AWVideoEncoderTypeHWH264;
         _captureManager.audioConfig = [[AWAudioConfig alloc] init];
         _captureManager.videoConfig = [[AWVideoConfig alloc] init];
+        
+        //竖屏推流
+        _captureManager.videoConfig.orientation = UIInterfaceOrientationPortrait;
     }
     return _captureManager;
 }
