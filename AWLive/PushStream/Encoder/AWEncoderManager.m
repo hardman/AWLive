@@ -5,8 +5,8 @@
  */
 
 #import "AWEncoderManager.h"
-#import "AWSWFaacAudioEncoder.h"
-#import "AWSWX264VideoEncoder.h"
+#import "AWSWFaacEncoder.h"
+#import "AWSWX264Encoder.h"
 #import "AWHWAACEncoder.h"
 #import "AWHWH264Encoder.h"
 
@@ -24,7 +24,7 @@
             self.audioEncoder = [[AWHWAACEncoder alloc] init];
             break;
         case AWAudioEncoderTypeSWFAAC:
-            self.audioEncoder = [[AWSWFaacAudioEncoder alloc] init];
+            self.audioEncoder = [[AWSWFaacEncoder alloc] init];
             break;
         default:
             NSLog(@"[E] AWEncoderManager.open please assin for audioEncoderType");
@@ -35,7 +35,7 @@
             self.videoEncoder = [[AWHWH264Encoder alloc] init];
             break;
         case AWVideoEncoderTypeSWX264:
-            self.videoEncoder = [[AWSWX264VideoEncoder alloc] init];
+            self.videoEncoder = [[AWSWX264Encoder alloc] init];
             break;
         default:
             NSLog(@"[E] AWEncoderManager.open please assin for videoEncoderType");
