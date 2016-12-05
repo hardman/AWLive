@@ -10,6 +10,6 @@
 
 #import "AWVideoEncoder.h"
 
-@interface AWSWX264VideoEncoder : AWVideoEncoder
+@interface AWSWX264Encoder : AWVideoEncoder
 
 @end

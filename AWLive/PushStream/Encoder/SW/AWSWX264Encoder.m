@@ -4,10 +4,10 @@
  My blog page: http://blog.csdn.net/hard_man/
  */
 
-#import "AWSWX264VideoEncoder.h"
+#import "AWSWX264Encoder.h"
 #import "AWEncoderManager.h"
 
-@implementation AWSWX264VideoEncoder
+@implementation AWSWX264Encoder
 -(aw_flv_video_tag *) encodeYUVDataToFlvTag:(NSData *)yuvData{
     return aw_sw_encoder_encode_x264_data((int8_t *)yuvData.bytes, yuvData.length, self.manager.timestamp + 1);
 }

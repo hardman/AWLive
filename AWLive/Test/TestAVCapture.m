@@ -13,7 +13,7 @@
  */
 
 //请修改此地址
-static NSString *sRtmpUrl = @"rtmp://192.168.1.61/live/test";
+static NSString *sRtmpUrl = @"rtmp://192.168.31.153/live/test";
 
 @interface TestVideoCapture ()<AWAVCaptureDelegate>
 
@@ -88,14 +88,21 @@ static NSString *sRtmpUrl = @"rtmp://192.168.1.61/live/test";
     
     self.startBtn = [[UIButton alloc] init];
     [self.startBtn setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
+    [self.startBtn setTitleColor:[UIColor grayColor] forState:UIControlStateHighlighted];
     self.startBtn.backgroundColor = [UIColor blackColor];
     [self.startBtn setTitle:@"开始直播" forState:UIControlStateNormal];
     [self.startBtn addTarget:self action:@selector(onStartClick) forControlEvents:UIControlEventTouchUpInside];
     [self.viewController.view addSubview:self.startBtn];
     
+    self.startBtn.layer.borderWidth = 0.5;
+    self.startBtn.layer.borderColor = [[UIColor colorWithRed:0.2 green:0.2 blue:0.2 alpha:1] CGColor];
+    self.startBtn.layer.cornerRadius = 5;
+    
     self.switchBtn = [[UIButton alloc] init];
     UIImage *switchImage = [self imageWithPath:@"camera_switch.png" scale:2];
+    switchImage = [switchImage imageWithRenderingMode:UIImageRenderingModeAlwaysTemplate];
     [self.switchBtn setImage:switchImage forState:UIControlStateNormal];
+    [self.switchBtn setTintColor:[UIColor whiteColor]];
     [self.switchBtn addTarget:self action:@selector(onSwitchClick) forControlEvents:UIControlEventTouchUpInside];
     [self.viewController.view addSubview:self.switchBtn];
 }
@@ -115,16 +122,25 @@ static NSString *sRtmpUrl = @"rtmp://192.168.1.61/live/test";
 
 -(void) onLayout{
     CGSize screenSize = [UIScreen mainScreen].bounds.size;
-    self.stateLabel.frame = CGRectMake(30, 30, 100, 30);
-    self.startBtn.frame = CGRectMake(40, screenSize.height - 50 - 40, screenSize.width - 80, 40);
-    self.switchBtn.frame = CGRectMake(screenSize.width - 30 - self.switchBtn.currentImage.size.width, 30, self.switchBtn.currentImage.size.width, self.switchBtn.currentImage.size.height);
+    
+    self.stateLabel.frame = CGRectMake(30, 130, 100, 30);
+    
+    self.startBtn.frame = CGRectMake(40, screenSize.height - 150 - 40, screenSize.width - 80, 40);
+    
+    self.switchBtn.frame = CGRectMake(screenSize.width - 30 - self.switchBtn.currentImage.size.width, 130, self.switchBtn.currentImage.size.width, self.switchBtn.currentImage.size.height);
     
     self.preview.frame = self.viewController.view.bounds;
     self.avCapture.preview.frame = self.preview.bounds;
 }
 
 -(void) setStateText:(NSString *)stateText{
-    self.stateLabel.text = stateText;
+    NSAttributedString *attributeString = [[NSAttributedString alloc] initWithString:stateText
+                                                                          attributes:@{
+                                                                                       NSForegroundColorAttributeName: [UIColor whiteColor],
+                                                                                       NSStrokeColorAttributeName: [UIColor blackColor],
+                                                                                       NSStrokeWidthAttributeName: @(-0.5)
+                                                                                       }];
+    self.stateLabel.attributedText = attributeString;
 }
 
 #pragma mark 事件

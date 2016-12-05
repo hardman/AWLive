@@ -10,6 +10,6 @@
 
 #import "AWAudioEncoder.h"
 
-@interface AWSWFaacAudioEncoder : AWAudioEncoder
+@interface AWSWFaacEncoder : AWAudioEncoder
 
 @end

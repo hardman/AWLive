@@ -4,10 +4,10 @@
  My blog page: http://blog.csdn.net/hard_man/
  */
 
-#import "AWSWFaacAudioEncoder.h"
+#import "AWSWFaacEncoder.h"
 #import "AWEncoderManager.h"
 
-@implementation AWSWFaacAudioEncoder
+@implementation AWSWFaacEncoder
 
 -(aw_flv_audio_tag *) encodePCMDataToFlvTag:(NSData *)pcmData{
     self.manager.timestamp += aw_sw_faac_encoder_max_input_sample_count() * 1000 / self.audioConfig.sampleRate;
