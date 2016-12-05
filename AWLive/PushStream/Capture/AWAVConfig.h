@@ -33,8 +33,8 @@
 
 // 推流分辨率宽高，目前不支持自由设置，只支持旋转。
 // UIInterfaceOrientationLandscapeLeft 和 UIInterfaceOrientationLandscapeRight 为横屏，其他值均为竖屏。
-@property (nonatomic, unsafe_unretained, readonly) NSInteger pushStreamWidth;
-@property (nonatomic, unsafe_unretained, readonly) NSInteger pushStreamHeight;
+@property (nonatomic, readonly, unsafe_unretained) NSInteger pushStreamWidth;
+@property (nonatomic, readonly, unsafe_unretained) NSInteger pushStreamHeight;
 
 @property (nonatomic, readonly, unsafe_unretained) aw_x264_config x264Config;
 @end

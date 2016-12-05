@@ -91,6 +91,8 @@
     videoConfig.fps = self.fps;
     videoConfig.dataFormat = self.dataFormat;
     videoConfig.orientation = self.orientation;
+    videoConfig.width = self.width;
+    videoConfig.height = self.height;
     return videoConfig;
 }
 
