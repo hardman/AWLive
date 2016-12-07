@@ -52,8 +52,8 @@
 {
     self = [super init];
     if (self) {
-        self.width = 480;
-        self.height = 640;
+        self.width = 540;
+        self.height = 960;
         self.bitrate = 1000000;
         self.fps = 20;
         self.dataFormat = X264_CSP_NV12;

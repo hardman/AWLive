@@ -40,7 +40,7 @@
     }
     //将bgra转为yuv
     //图像宽度
-    int width = imageSize.width;
+    int width = aw_stride((int)imageSize.width);
     //图像高度
     int height = imageSize.height;
     //宽*高

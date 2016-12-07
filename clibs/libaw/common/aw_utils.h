@@ -23,4 +23,7 @@ printf("\n");\
 
 #define aw_log(...) AWLog(__VA_ARGS__)
 
+//视频硬件加速，stride须设置为16的倍数
+#define aw_stride(wid) ((wid % 16) ? ((wid) + 16 - (wid) % 16): (wid))
+
 #endif /* aw_utils_h */

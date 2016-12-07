@@ -44,7 +44,7 @@
     }
     
     //将yuv数据填充到CVPixelBufferRef中
-    size_t y_size = pixelWidth * pixelHeight;
+    size_t y_size = aw_stride(pixelWidth) * pixelHeight;
     size_t uv_size = y_size / 4;
     uint8_t *yuv_frame = (uint8_t *)yuvData.bytes;
     

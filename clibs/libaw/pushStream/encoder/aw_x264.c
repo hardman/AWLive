@@ -32,7 +32,7 @@ static void aw_create_x264_param(aw_x264_context *aw_ctx, x264_param_t ** param)
     x264_param->i_log_level = X264_LOG_NONE;
     
     //比特率 帧率
-    x264_param->rc.i_rc_method = X264_RC_ABR;//CQP(恒定质量)，CRF(恒定码率)，ABR(平均码率)
+    x264_param->rc.i_rc_method = X264_RC_CQP;//CQP(恒定质量)，CRF(恒定码率)，ABR(平均码率)
     x264_param->rc.i_bitrate = (uint32_t)(aw_ctx->config.bitrate / 1000);//1000kbs
     x264_param->rc.i_vbv_max_bitrate = (uint32_t)((aw_ctx->config.bitrate * 1.2) / 1000);
     x264_param->rc.i_vbv_buffer_size = x264_param->rc.i_vbv_max_bitrate;
@@ -117,18 +117,19 @@ static void aw_encode_x264_header(aw_x264_context *aw_ctx){
 //编码一帧数据
 extern void aw_encode_yuv_frame_2_x264(aw_x264_context *aw_ctx, int8_t *yuv_frame, int len){
     if (len > 0 && yuv_frame) {
+        int actual_width = aw_stride(aw_ctx->config.width);
         //数据保存到pic_in中
         if (aw_ctx->config.input_data_format == X264_CSP_NV12) {
             aw_ctx->pic_in->img.plane[0] = (uint8_t *)yuv_frame;
-            aw_ctx->pic_in->img.plane[1] = (uint8_t *)yuv_frame + aw_ctx->config.width * aw_ctx->config.height;
+            aw_ctx->pic_in->img.plane[1] = (uint8_t *)yuv_frame + actual_width * aw_ctx->config.height;
         }else if(aw_ctx->config.input_data_format == X264_CSP_BGR || aw_ctx->config.input_data_format == X264_CSP_RGB){
             aw_ctx->pic_in->img.plane[0] = (uint8_t *)yuv_frame;
         }else if(aw_ctx->config.input_data_format == X264_CSP_BGRA){
             aw_ctx->pic_in->img.plane[0] = (uint8_t *)yuv_frame;
         }else{//YUV420
             aw_ctx->pic_in->img.plane[0] = (uint8_t *)yuv_frame;
-            aw_ctx->pic_in->img.plane[1] = (uint8_t *)yuv_frame + aw_ctx->config.width * aw_ctx->config.height;
-            aw_ctx->pic_in->img.plane[2] = (uint8_t *)yuv_frame + aw_ctx->config.width * aw_ctx->config.height * 5 / 4;
+            aw_ctx->pic_in->img.plane[1] = (uint8_t *)yuv_frame + actual_width * aw_ctx->config.height;
+            aw_ctx->pic_in->img.plane[2] = (uint8_t *)yuv_frame + actual_width * aw_ctx->config.height * 5 / 4;
         }
         //编码
         x264_encoder_encode(aw_ctx->x264_handler, &aw_ctx->nal, &aw_ctx->nal_count, aw_ctx->pic_in, aw_ctx->pic_out);
@@ -172,24 +173,26 @@ extern aw_x264_context *alloc_aw_x264_context(aw_x264_config config){
     x264_picture_t *pic_in = aw_alloc(sizeof(x264_picture_t));
     x264_picture_init(pic_in);
     
-    x264_picture_alloc(pic_in, config.input_data_format, config.width, config.height);
+    int alloc_width = aw_stride(config.width);
+    
+    x264_picture_alloc(pic_in, config.input_data_format, alloc_width, config.height);
     
     pic_in->img.i_csp = config.input_data_format;
     
     if (config.input_data_format == X264_CSP_NV12) {
-        pic_in->img.i_stride[0] = config.width;
-        pic_in->img.i_stride[1] = config.width;
+        pic_in->img.i_stride[0] = alloc_width;
+        pic_in->img.i_stride[1] = alloc_width;
         pic_in->img.i_plane = 2;
     }else if(config.input_data_format == X264_CSP_BGR || config.input_data_format == X264_CSP_RGB){
-        pic_in->img.i_stride[0] = config.width * 3;
+        pic_in->img.i_stride[0] = alloc_width * 3;
         pic_in->img.i_plane = 1;
     }else if(config.input_data_format == X264_CSP_BGRA){
-        pic_in->img.i_stride[0] = config.width * 4;
+        pic_in->img.i_stride[0] = alloc_width * 4;
         pic_in->img.i_plane = 1;
     }else{//YUV420
-        pic_in->img.i_stride[0] = config.width;
-        pic_in->img.i_stride[1] = config.width / 2;
-        pic_in->img.i_stride[2] = config.width / 2;
+        pic_in->img.i_stride[0] = alloc_width;
+        pic_in->img.i_stride[1] = alloc_width / 2;
+        pic_in->img.i_stride[2] = alloc_width / 2;
         pic_in->img.i_plane = 3;
     }
     
