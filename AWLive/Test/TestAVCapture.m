@@ -13,7 +13,7 @@
  */
 
 //请修改此地址
-static NSString *sRtmpUrl = @"rtmp://192.168.1.61/live/test";
+static NSString *sRtmpUrl = @"rtmp://192.168.1.61:1935/live/test";
 
 @interface TestVideoCapture ()<AWAVCaptureDelegate>
 
