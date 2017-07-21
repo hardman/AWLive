@@ -33,6 +33,7 @@ static void aw_streamer_close_rtmp_context();
 extern void aw_streamer_send_video_data(aw_flv_video_tag *video_tag){
     if (!aw_streamer_is_rtmp_valid()) {
         aw_log("[E] aw_streamer_send_video_data s_rtmp_ctx is NULL");
+        free_aw_flv_video_tag(&video_tag);
         return;
     }
     
@@ -44,10 +45,12 @@ extern void aw_streamer_send_video_data(aw_flv_video_tag *video_tag){
 extern void aw_streamer_send_video_sps_pps_tag(aw_flv_video_tag *sps_pps_tag){
     if (!aw_streamer_is_rtmp_valid()) {
         aw_log("[E] aw_streamer_send_video_sps_pps_tag when rtmp is not valid");
+        free_aw_flv_video_tag(&sps_pps_tag);
         return;
     }
     
     if (s_rtmp_ctx->is_header_sent) {
+        free_aw_flv_video_tag(&sps_pps_tag);
         return;
     }
     
@@ -60,10 +63,12 @@ extern void aw_streamer_send_video_sps_pps_tag(aw_flv_video_tag *sps_pps_tag){
 extern void aw_streamer_send_audio_specific_config_tag(aw_flv_audio_tag *asc_tag){
     if (!aw_streamer_is_rtmp_valid()) {
         aw_log("[E] aw_streamer_send_audio_specific_config_tag when rtmp is not valid");
+        free_aw_flv_audio_tag(&asc_tag);
         return;
     }
     
     if (s_rtmp_ctx->is_header_sent) {
+        free_aw_flv_audio_tag(&asc_tag);
         return;
     }
     
@@ -74,6 +79,7 @@ extern void aw_streamer_send_audio_specific_config_tag(aw_flv_audio_tag *asc_tag
 extern void aw_streamer_send_audio_data(aw_flv_audio_tag *audio_tag){
     if (!aw_streamer_is_rtmp_valid()) {
         aw_log("[E] aw_streamer_send_audio_specific_config_tag when rtmp is not valid");
+        free_aw_flv_audio_tag(&audio_tag);
         return;
     }
     
@@ -83,9 +89,6 @@ extern void aw_streamer_send_audio_data(aw_flv_audio_tag *audio_tag){
 //rtmp------
 
 static void aw_streamer_send_flv_tag_to_rtmp(aw_flv_common_tag *common_tag){
-    if (!aw_streamer_is_streaming()) {
-        return;
-    }
     if (common_tag) {
         aw_write_flv_tag(&s_output_buf, common_tag);
         switch (common_tag->tag_type) {
@@ -102,6 +105,10 @@ static void aw_streamer_send_flv_tag_to_rtmp(aw_flv_common_tag *common_tag){
                 break;
             }
         }
+    }
+    
+    if (!aw_streamer_is_streaming()) {
+        return;
     }
     
     if (s_output_buf->size <= 0) {

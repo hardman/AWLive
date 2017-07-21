@@ -15,7 +15,7 @@
 }
 
 -(void) onErrorWithCode:(AWEncoderErrorCode) code des:(NSString *) des{
-    aw_log("[ERROR] encoder error code:%ld des:%s", code, des.UTF8String);
+    aw_log("[ERROR] encoder error code:%ld des:%s", (unsigned long)code, des.UTF8String);
 }
 
 @end

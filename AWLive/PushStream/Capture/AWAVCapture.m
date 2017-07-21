@@ -232,6 +232,7 @@ extern void aw_rtmp_state_changed_cb_in_oc(aw_rtmp_state old_state, aw_rtmp_stat
             if(weakSelf.isCapturing){
                 if (!weakSelf.isSpsPpsAndAudioSpecificConfigSent) {
                     [weakSelf sendSpsPpsAndAudioSpecificConfigTagToSendQueue:sendQueue];
+                    free_aw_flv_video_tag((aw_flv_video_tag **)&video_tag);
                 }else{
                     aw_streamer_send_video_data(video_tag);
                 }
@@ -247,6 +248,7 @@ extern void aw_rtmp_state_changed_cb_in_oc(aw_rtmp_state old_state, aw_rtmp_stat
             if(weakSelf.isCapturing){
                 if (!weakSelf.isSpsPpsAndAudioSpecificConfigSent) {
                     [weakSelf sendSpsPpsAndAudioSpecificConfigTagToSendQueue:sendQueue];
+                    free_aw_flv_audio_tag((aw_flv_audio_tag **)&audio_tag);
                 }else{
                     aw_streamer_send_audio_data(audio_tag);
                 }
