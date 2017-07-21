@@ -134,6 +134,12 @@ extern void aw_encode_yuv_frame_2_x264(aw_x264_context *aw_ctx, int8_t *yuv_fram
         //编码
         x264_encoder_encode(aw_ctx->x264_handler, &aw_ctx->nal, &aw_ctx->nal_count, aw_ctx->pic_in, aw_ctx->pic_out);
         aw_ctx->pic_in->i_pts++;
+        
+        //置空
+        aw_ctx->pic_in->img.plane[0] = NULL;
+        aw_ctx->pic_in->img.plane[1] = NULL;
+        aw_ctx->pic_in->img.plane[2] = NULL;
+        aw_ctx->pic_in->img.plane[3] = NULL;
     }
     
     //保存本帧数据
@@ -222,6 +228,7 @@ extern void free_aw_x264_context(aw_x264_context **ctx_p){
         }
         
         if (ctx->pic_out) {
+            x264_picture_clean(ctx->pic_out);
             aw_free(ctx->pic_out);
             ctx->pic_out = NULL;
         }
