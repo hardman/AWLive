@@ -32,11 +32,6 @@ extern void aw_rtmp_state_changed_cb_in_oc(aw_rtmp_state old_state, aw_rtmp_stat
 @property (nonatomic, unsafe_unretained) AWAudioEncoderType audioEncoderType;
 @property (nonatomic, unsafe_unretained) AWAudioEncoderType videoEncoderType;
 
-//编码数据队列
-@property (nonatomic, readonly, strong) dispatch_queue_t encodeSampleQueue;
-//发送数据队列
-@property (nonatomic, readonly, strong) dispatch_queue_t sendSampleQueue;
-
 //状态变化回调
 @property (nonatomic, weak) id<AWAVCaptureDelegate> stateDelegate;
 

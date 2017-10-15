@@ -18,8 +18,8 @@ extern void aw_rtmp_state_changed_cb_in_oc(aw_rtmp_state old_state, aw_rtmp_stat
 
 @interface AWAVCapture()
 //编码队列，发送队列
-@property (nonatomic, strong) dispatch_queue_t encodeSampleQueue;
-@property (nonatomic, strong) dispatch_queue_t sendSampleQueue;
+@property (nonatomic, strong) NSOperationQueue *encodeSampleOpQueue;
+@property (nonatomic, strong) NSOperationQueue *sendSampleOpQueue;
 
 //是否已发送了sps/pps
 @property (nonatomic, unsafe_unretained) BOOL isSpsPpsAndAudioSpecificConfigSent;
@@ -33,18 +33,20 @@ extern void aw_rtmp_state_changed_cb_in_oc(aw_rtmp_state old_state, aw_rtmp_stat
 
 @implementation AWAVCapture
 
--(dispatch_queue_t)encodeSampleQueue{
-    if (!_encodeSampleQueue) {
-        _encodeSampleQueue = dispatch_queue_create("aw.encodesample.queue", DISPATCH_QUEUE_SERIAL);
+-(NSOperationQueue *)encodeSampleOpQueue{
+    if (!_encodeSampleOpQueue) {
+        _encodeSampleOpQueue = [[NSOperationQueue alloc] init];
+        _encodeSampleOpQueue.maxConcurrentOperationCount = 1;
     }
-    return _encodeSampleQueue;
+    return _encodeSampleOpQueue;
 }
 
--(dispatch_queue_t)sendSampleQueue{
-    if (!_sendSampleQueue) {
-        _sendSampleQueue = dispatch_queue_create("aw.sendsample.queue", DISPATCH_QUEUE_SERIAL);
+-(NSOperationQueue *)sendSampleOpQueue{
+    if (!_sendSampleOpQueue) {
+        _sendSampleOpQueue = [[NSOperationQueue alloc] init];
+        _sendSampleOpQueue.maxConcurrentOperationCount = 1;
     }
-    return _sendSampleQueue;
+    return _sendSampleOpQueue;
 }
 
 -(AWEncoderManager *)encoderManager{
@@ -133,12 +135,18 @@ extern void aw_rtmp_state_changed_cb_in_oc(aw_rtmp_state old_state, aw_rtmp_stat
 -(void) stopCapture{
     self.isCapturing = NO;
     self.isSpsPpsAndAudioSpecificConfigSent = NO;
-    __weak typeof(self) weakSelf = self;
-    dispatch_sync(self.sendSampleQueue, ^{
+    dispatch_async(dispatch_get_global_queue(0, 0), ^{
+        //关闭编码器
+        [self.encodeSampleOpQueue cancelAllOperations];
+        [self.encodeSampleOpQueue waitUntilAllOperationsAreFinished];
+        
+        [self.encoderManager close];
+        
+        //关闭流
+        [self.sendSampleOpQueue cancelAllOperations];
+        [self.sendSampleOpQueue waitUntilAllOperationsAreFinished];
+        
         aw_streamer_close();
-    });
-    dispatch_sync(self.encodeSampleQueue, ^{
-        [weakSelf.encoderManager close];
     });
 }
 
@@ -171,64 +179,64 @@ extern void aw_rtmp_state_changed_cb_in_oc(aw_rtmp_state old_state, aw_rtmp_stat
 }
 
 //发送数据
--(void) sendVideoSampleBuffer:(CMSampleBufferRef) sampleBuffer toEncodeQueue:(dispatch_queue_t) encodeQueue toSendQueue:(dispatch_queue_t) sendQueue{
+-(void) sendVideoSampleBuffer:(CMSampleBufferRef) sampleBuffer toEncodeQueue:(NSOperationQueue *) encodeQueue toSendQueue:(NSOperationQueue *) sendQueue{
     if (_inBackground) {
         return;
     }
     CFRetain(sampleBuffer);
     __weak typeof(self) weakSelf = self;
-    dispatch_async(encodeQueue, ^{
+    [encodeQueue addOperationWithBlock:^{
         if (weakSelf.isCapturing) {
             aw_flv_video_tag *video_tag = [weakSelf.encoderManager.videoEncoder encodeVideoSampleBufToFlvTag:sampleBuffer];
             [weakSelf sendFlvVideoTag:video_tag toSendQueue:sendQueue];
         }
         CFRelease(sampleBuffer);
-    });
+    }];
 }
 
--(void) sendAudioSampleBuffer:(CMSampleBufferRef) sampleBuffer toEncodeQueue:(dispatch_queue_t) encodeQueue toSendQueue:(dispatch_queue_t) sendQueue{
+-(void) sendAudioSampleBuffer:(CMSampleBufferRef) sampleBuffer toEncodeQueue:(NSOperationQueue *) encodeQueue toSendQueue:(NSOperationQueue *) sendQueue{
     CFRetain(sampleBuffer);
     __weak typeof(self) weakSelf = self;
-    dispatch_async(encodeQueue, ^{
+    [encodeQueue addOperationWithBlock:^{
         if (weakSelf.isCapturing) {
             aw_flv_audio_tag *audio_tag = [weakSelf.encoderManager.audioEncoder encodeAudioSampleBufToFlvTag:sampleBuffer];
             [weakSelf sendFlvAudioTag:audio_tag toSendQueue:sendQueue];
         }
         CFRelease(sampleBuffer);
-    });
+    }];
 }
 
--(void) sendVideoYuvData:(NSData *)yuvData toEncodeQueue:(dispatch_queue_t) encodeQueue toSendQueue:(dispatch_queue_t) sendQueue{
+-(void) sendVideoYuvData:(NSData *)yuvData toEncodeQueue:(NSOperationQueue *) encodeQueue toSendQueue:(NSOperationQueue *) sendQueue{
     if (_inBackground) {
         return;
     }
     __weak typeof(self) weakSelf = self;
-    dispatch_async(encodeQueue, ^{
+    [encodeQueue addOperationWithBlock:^{
         if (weakSelf.isCapturing) {
             NSData *rotatedData = [weakSelf.encoderManager.videoEncoder rotateNV12Data:yuvData];
             aw_flv_video_tag *video_tag = [weakSelf.encoderManager.videoEncoder encodeYUVDataToFlvTag:rotatedData];
             [weakSelf sendFlvVideoTag:video_tag toSendQueue:sendQueue];
         }
-    });
+    }];
 }
 
--(void) sendAudioPcmData:(NSData *)pcmData toEncodeQueue:(dispatch_queue_t) encodeQueue toSendQueue:(dispatch_queue_t) sendQueue{
+-(void) sendAudioPcmData:(NSData *)pcmData toEncodeQueue:(NSOperationQueue *) encodeQueue toSendQueue:(NSOperationQueue *) sendQueue{
     __weak typeof(self) weakSelf = self;
-    dispatch_async(encodeQueue, ^{
+    [encodeQueue addOperationWithBlock:^{
         if (weakSelf.isCapturing) {
             aw_flv_audio_tag *audio_tag = [weakSelf.encoderManager.audioEncoder encodePCMDataToFlvTag:pcmData];
             [weakSelf sendFlvAudioTag:audio_tag toSendQueue:sendQueue];
         }
-    });
+    }];
 }
 
--(void) sendFlvVideoTag:(aw_flv_video_tag *)video_tag toSendQueue:(dispatch_queue_t) sendQueue{
+-(void) sendFlvVideoTag:(aw_flv_video_tag *)video_tag toSendQueue:(NSOperationQueue *) sendQueue{
     if (_inBackground) {
         return;
     }
     __weak typeof(self) weakSelf = self;
     if (video_tag) {
-        dispatch_async(sendQueue, ^{
+        [sendQueue addOperationWithBlock:^{
             if(weakSelf.isCapturing){
                 if (!weakSelf.isSpsPpsAndAudioSpecificConfigSent) {
                     [weakSelf sendSpsPpsAndAudioSpecificConfigTagToSendQueue:sendQueue];
@@ -236,15 +244,17 @@ extern void aw_rtmp_state_changed_cb_in_oc(aw_rtmp_state old_state, aw_rtmp_stat
                 }else{
                     aw_streamer_send_video_data(video_tag);
                 }
+            }else{
+                free_aw_flv_video_tag((aw_flv_video_tag **)(&video_tag));
             }
-        });
+        }];
     }
 }
 
--(void) sendFlvAudioTag:(aw_flv_audio_tag *)audio_tag toSendQueue:(dispatch_queue_t) sendQueue{
+-(void) sendFlvAudioTag:(aw_flv_audio_tag *)audio_tag toSendQueue:(NSOperationQueue *) sendQueue{
     __weak typeof(self) weakSelf = self;
     if(audio_tag){
-        dispatch_async(sendQueue, ^{
+        [sendQueue addOperationWithBlock:^{
             if(weakSelf.isCapturing){
                 if (!weakSelf.isSpsPpsAndAudioSpecificConfigSent) {
                     [weakSelf sendSpsPpsAndAudioSpecificConfigTagToSendQueue:sendQueue];
@@ -252,17 +262,19 @@ extern void aw_rtmp_state_changed_cb_in_oc(aw_rtmp_state old_state, aw_rtmp_stat
                 }else{
                     aw_streamer_send_audio_data(audio_tag);
                 }
+            }else{
+                free_aw_flv_audio_tag((aw_flv_audio_tag **)&audio_tag);
             }
-        });
+        }];
     }
 }
 
--(void) sendSpsPpsAndAudioSpecificConfigTagToSendQueue:(dispatch_queue_t) sendQueue{
+-(void) sendSpsPpsAndAudioSpecificConfigTagToSendQueue:(NSOperationQueue *) sendQueue{
     if (self.isSpsPpsAndAudioSpecificConfigSent) {
         return;
     }
     __weak typeof(self) weakSelf = self;
-    dispatch_async(sendQueue, ^{
+    [sendQueue addOperationWithBlock:^{
         if (!weakSelf.isCapturing || weakSelf.isSpsPpsAndAudioSpecificConfigSent) {
             return;
         }
@@ -279,31 +291,31 @@ extern void aw_rtmp_state_changed_cb_in_oc(aw_rtmp_state old_state, aw_rtmp_stat
         weakSelf.isSpsPpsAndAudioSpecificConfigSent = spsPpsTag || audioSpecificConfigTag;
         
         aw_log("[D] is sps pps and audio sepcific config sent=%d", weakSelf.isSpsPpsAndAudioSpecificConfigSent);
-    });
+    }];
 }
 
 //使用rtmp协议发送数据
 -(void) sendVideoSampleBuffer:(CMSampleBufferRef) sampleBuffer{
-    [self sendVideoSampleBuffer:sampleBuffer toEncodeQueue:self.encodeSampleQueue toSendQueue:self.sendSampleQueue];
+    [self sendVideoSampleBuffer:sampleBuffer toEncodeQueue:self.encodeSampleOpQueue toSendQueue:self.sendSampleOpQueue];
 }
 
 -(void) sendAudioSampleBuffer:(CMSampleBufferRef) sampleBuffer{
-    [self sendAudioSampleBuffer:sampleBuffer toEncodeQueue:self.encodeSampleQueue toSendQueue:self.sendSampleQueue];
+    [self sendAudioSampleBuffer:sampleBuffer toEncodeQueue:self.encodeSampleOpQueue toSendQueue:self.sendSampleOpQueue];
 }
 
 -(void) sendVideoYuvData:(NSData *)videoData{
-    [self sendVideoYuvData:(NSData *)videoData toEncodeQueue:self.encodeSampleQueue toSendQueue:self.sendSampleQueue];
+    [self sendVideoYuvData:(NSData *)videoData toEncodeQueue:self.encodeSampleOpQueue toSendQueue:self.sendSampleOpQueue];
 }
 -(void) sendAudioPcmData:(NSData *)audioData{
-    [self sendAudioPcmData:audioData toEncodeQueue:self.encodeSampleQueue toSendQueue:self.sendSampleQueue];
+    [self sendAudioPcmData:audioData toEncodeQueue:self.encodeSampleOpQueue toSendQueue:self.sendSampleOpQueue];
 }
 
 -(void) sendFlvVideoTag:(aw_flv_video_tag *)flvVideoTag{
-    [self sendFlvVideoTag:flvVideoTag toSendQueue:self.sendSampleQueue];
+    [self sendFlvVideoTag:flvVideoTag toSendQueue:self.sendSampleOpQueue];
 }
 
 -(void) sendFlvAudioTag:(aw_flv_audio_tag *)flvAudioTag{
-    [self sendFlvAudioTag:flvAudioTag toSendQueue:self.sendSampleQueue];
+    [self sendFlvAudioTag:flvAudioTag toSendQueue:self.sendSampleOpQueue];
 }
 
 -(NSString *)captureSessionPreset{
