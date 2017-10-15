@@ -36,7 +36,7 @@ extern aw_flv_video_tag * aw_sw_encoder_encode_x264_data(int8_t *yuv_data, long 
     
     x264_picture_t *pic_out = s_x264_ctx->pic_out;
     
-    aw_flv_video_tag *video_tag = aw_encoder_create_video_tag((int8_t *)s_x264_ctx->encoded_h264_data->data, s_x264_ctx->encoded_h264_data->size, timeStamp, (uint32_t)((pic_out->i_pts - pic_out->i_dts) * 1000.0 / s_x264_ctx->config.fps), pic_out->b_keyframe);
+    aw_flv_video_tag *video_tag = aw_encoder_create_video_tag((int8_t *)s_x264_ctx->encoded_h264_data->data, s_x264_ctx->encoded_h264_data->size, timeStamp, (uint32_t)((pic_out->i_pts - pic_out->i_dts) * 1000.0 / 90000), pic_out->b_keyframe);
     
     //    aw_log("----------------timestamp=%d, composition_time=%d, s_video_time_stamp=%d", video_tag->common_tag.timestamp, video_tag->h264_composition_time, s_video_time_stamp);
     

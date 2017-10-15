@@ -107,7 +107,7 @@ static void aw_write_audio_tag_body(aw_data **flv_data, aw_flv_audio_tag *audio_
 static void aw_write_video_tag_body(aw_data **flv_data, aw_flv_video_tag *video_tag){
     uint8_t video_header = 0;
     video_header |= video_tag->frame_type << 4 & 0xf0;
-    video_header |= video_tag->codec_id;
+    video_header |= video_tag->codec_id & 0x0f;
     data_writer.write_uint8(flv_data, video_header);
     
     if (video_tag->codec_id == aw_flv_v_codec_id_H264) {
