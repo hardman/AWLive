@@ -14,7 +14,6 @@
 @property (nonatomic, copy) NSData *spsPpsData;
 @property (nonatomic, copy) NSData *naluData;
 @property (nonatomic, unsafe_unretained) BOOL isKeyFrame;
-@property (nonatomic, unsafe_unretained) uint32_t ctsMs;
 
 @end
 
@@ -85,12 +84,11 @@
             [mutableData appendData:_naluData];
             
             //将h264数据合成flv tag，合成flvtag之后就可以直接发送到服务端了。后续会介绍
-            aw_flv_video_tag *video_tag = aw_encoder_create_video_tag((int8_t *)mutableData.bytes, mutableData.length, ptsMs, self.ctsMs, self.isKeyFrame);
+            aw_flv_video_tag *video_tag = aw_encoder_create_video_tag((int8_t *)mutableData.bytes, mutableData.length, ptsMs, 0, self.isKeyFrame);
             
             //到此，编码工作完成，清除状态。
             _naluData = nil;
             _isKeyFrame = NO;
-            _ctsMs = 0;
             
             CVPixelBufferUnlockBaseAddress(pixelBuf, 0);
             
@@ -167,12 +165,6 @@ static void vtCompressionSessionCallback (void * CM_NULLABLE outputCallbackRefCo
     uint8_t *blockData;
     status = CMBlockBufferGetDataPointer(blockBuffer, 0, NULL, &blockDataLen, (char **)&blockData);
     if (status == noErr) {
-        //获取时间戳
-        CMTime ptsTime = CMSampleBufferGetOutputPresentationTimeStamp(sampleBuffer);
-        CMTime dtsTime = CMSampleBufferGetOutputDecodeTimeStamp(sampleBuffer);
-        uint32_t ctsMs = (uint32_t)((1.0 * ptsTime.value / ptsTime.timescale - 1.0 * dtsTime.value / ptsTime.timescale) * 1000);
-        encoder.ctsMs = ctsMs;
-        
         size_t currReadPos = 0;
         //一般情况下都是只有1帧，在最开始编码的时候有2帧，取最后一帧
         while (currReadPos < blockDataLen - 4) {
@@ -240,7 +232,6 @@ static void vtCompressionSessionCallback (void * CM_NULLABLE outputCallbackRefCo
     
     self.naluData = nil;
     self.isKeyFrame = NO;
-    self.ctsMs = 0;
     self.spsPpsData = nil;
 }
 
