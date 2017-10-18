@@ -31,6 +31,8 @@
 //推流方向
 @property (nonatomic, unsafe_unretained) UIInterfaceOrientation orientation;
 
+-(BOOL) shouldRotate;
+
 // 推流分辨率宽高，目前不支持自由设置，只支持旋转。
 // UIInterfaceOrientationLandscapeLeft 和 UIInterfaceOrientationLandscapeRight 为横屏，其他值均为竖屏。
 @property (nonatomic, readonly, unsafe_unretained) NSInteger pushStreamWidth;

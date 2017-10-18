@@ -62,17 +62,21 @@
 }
 
 -(NSInteger)pushStreamWidth{
-    if (UIInterfaceOrientationIsLandscape(self.orientation)) {
+    if (self.shouldRotate) {
         return self.height;
     }
     return self.width;
 }
 
 -(NSInteger)pushStreamHeight{
-    if (UIInterfaceOrientationIsLandscape(self.orientation)) {
+    if (self.shouldRotate) {
         return self.width;
     }
     return self.height;
+}
+
+-(BOOL)shouldRotate{
+    return UIInterfaceOrientationIsLandscape(self.orientation);
 }
 
 -(aw_x264_config) x264Config{

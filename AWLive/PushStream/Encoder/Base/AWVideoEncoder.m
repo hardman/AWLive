@@ -10,6 +10,9 @@
 @implementation AWVideoEncoder
 
 -(NSData *)rotateNV12Data:(NSData *)nv12Data{
+    if (!self.videoConfig.shouldRotate) {
+        return nv12Data;
+    }
     int degree = 0;
     switch (self.videoConfig.orientation) {
         case UIInterfaceOrientationLandscapeLeft:
@@ -26,22 +29,34 @@
         uint8_t *src_nv12_bytes = (uint8_t *)nv12Data.bytes;
         uint32_t width = (uint32_t)self.videoConfig.width;
         uint32_t height = (uint32_t)self.videoConfig.height;
-        uint32_t w_x_h = (uint32_t)(self.videoConfig.width * self.videoConfig.height);
         
-        uint8_t *rotatedI420Bytes = aw_alloc(nv12Data.length);
+        uint32_t alignedWidth = aw_stride(width);
+        uint32_t alignedWidthxH = alignedWidth * height;
         
-        NV12ToI420Rotate(src_nv12_bytes, width,
-                         src_nv12_bytes + w_x_h, width,
-                         rotatedI420Bytes, height,
-                         rotatedI420Bytes + w_x_h, height / 2,
-                         rotatedI420Bytes + w_x_h + w_x_h / 4, height / 2,
-                         width, height, (RotationModeEnum)degree);
+        uint32_t alignedHeight = aw_stride(height);
+        uint32_t alignedHeightxW = alignedHeight * width;
         
-        I420ToNV12(rotatedI420Bytes, height,
-                   rotatedI420Bytes + w_x_h, height / 2,
-                   rotatedI420Bytes + w_x_h + w_x_h / 4, height / 2,
-                   src_nv12_bytes, height, src_nv12_bytes + w_x_h, height,
-                   height, width);
+        uint32_t rotatedLen = alignedHeightxW * 3 / 2;
+        
+        uint8_t *rotatedI420Bytes = aw_alloc(rotatedLen);
+        
+        //使用libyuv前，yuv数据已经是有padding的数据了（没有padding会计算错误）。
+        //因此旋转的时候，需要根据具体情况调整 stride。
+        //旋转前 width 有padding，旋转后 width变成了高应该去掉padding，否则会有绿边。
+        //旋转后 height 有padding，需要设置正确的stride增加padding。
+        
+        NV12ToI420Rotate(src_nv12_bytes, alignedWidth,
+                         src_nv12_bytes + alignedWidthxH, alignedWidth,
+                         rotatedI420Bytes, alignedHeight,
+                         rotatedI420Bytes + alignedHeightxW, alignedHeight / 2,
+                         rotatedI420Bytes + alignedHeightxW + alignedHeightxW / 4, alignedHeight / 2,
+                         alignedWidth, height, (RotationModeEnum)degree);
+        
+        I420ToNV12(rotatedI420Bytes, alignedHeight,
+                   rotatedI420Bytes + alignedHeightxW, alignedHeight / 2,
+                   rotatedI420Bytes + alignedHeightxW + alignedHeightxW / 4, alignedHeight / 2,
+                   src_nv12_bytes, alignedHeight, src_nv12_bytes + alignedHeightxW, alignedHeight,
+                   alignedHeight, width);
         
         aw_free(rotatedI420Bytes);
     }
@@ -71,7 +86,7 @@
     CVPixelBufferLockBaseAddress(pixelBuffer, 0);
     
     //图像宽度（像素）
-    size_t pixelWidth = CVPixelBufferGetWidth(pixelBuffer);
+    size_t pixelWidth = aw_stride(CVPixelBufferGetWidth(pixelBuffer));
     //图像高度（像素）
     size_t pixelHeight = CVPixelBufferGetHeight(pixelBuffer);
     //yuv中的y所占字节数
