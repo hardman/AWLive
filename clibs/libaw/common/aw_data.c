@@ -46,7 +46,7 @@ void memcpy_aw_data(aw_data **tdata, const void *fdata, int size){
     }
     aw_data *tdatap = *tdata;
     if (!tdatap) {
-        tdatap = alloc_aw_data(0);
+        tdatap = alloc_aw_data(size);
         *tdata = tdatap;
     }
     int new_size = tdatap->alloc_size;
