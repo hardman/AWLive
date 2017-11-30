@@ -157,7 +157,7 @@
 
 -(void) createOutput{
     
-    dispatch_queue_t captureQueue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
+    dispatch_queue_t captureQueue = dispatch_queue_create("aw.capture.queue", DISPATCH_QUEUE_SERIAL);
     
     self.videoDataOutput = [[AVCaptureVideoDataOutput alloc] init];
     [self.videoDataOutput setSampleBufferDelegate:self queue:captureQueue];
